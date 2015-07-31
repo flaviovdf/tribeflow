@@ -20,9 +20,12 @@ import numpy as np
 def finalize_splits(nz, n_splits, splitted, tstamps, Trace, nh, ns, nd, kernel):
     
     new_nz = nz + n_splits #len(set(splitted)) 
-    new_P = [row for row in kernel.get_state()]
-    for _ in xrange(n_splits):
-        new_P.append(kernel.get_priors())
+    if kernel.get_priors().shape[0] > 0:
+        new_P = [row for row in kernel.get_state()]
+        for _ in xrange(n_splits):
+            new_P.append(kernel.get_priors())
+    else:
+        new_P = kernel.get_state()
 
     Trace[:, -1] = splitted
     
@@ -177,16 +180,21 @@ def correlate_counts(Count_zh, Count_sz, Count_dz, count_h, count_z, \
     return C
 
 def finalize_merge(nz, to_merge, tstamps, Trace, nh, ns, nd, kernel):
-    
-    new_P_dict = dict((i, row) for i, row in enumerate(kernel.get_state()))
+     
     for z1, z2 in to_merge:
         idx = Trace[:, -1] == z2
-        del new_P_dict[z2]
         Trace[:, -1][idx] = z1
     
-    new_P = []
-    for i in sorted(new_P_dict):
-        new_P.append(new_P_dict[i])
+    if kernel.get_priors().shape[0] > 0:
+        new_P_dict = dict((i, row) for i, row in enumerate(kernel.get_state()))
+        for z1, z2 in to_merge:
+            del new_P_dict[z2]
+
+        new_P = []
+        for i in sorted(new_P_dict):
+            new_P.append(new_P_dict[i])
+    else:
+        new_P = kernel.get_state()
 
     #Make sure new trace has contiguous ids
     new_nz = nz - len(to_merge)
