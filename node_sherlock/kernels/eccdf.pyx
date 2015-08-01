@@ -65,15 +65,7 @@ cdef class ECCDFKernel(Kernel):
         return (a + n - loc) / (a + b + n)
     
     cdef void mstep(self, StampLists stamps) nogil:
-        cdef int nz = self.P.shape[0]
-        cdef double total = 0
-        cdef int z
-        for z in xrange(nz):
-            self.P[z, 0] = stamps.size(z)
-            total += self.P[z, 0]
-
-        for z in xrange(nz):
-            self.P[z, 1] = total
+        pass
 
     def get_priors(self):
         return np.array(self.priors)

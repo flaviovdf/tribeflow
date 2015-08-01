@@ -25,6 +25,9 @@ def main():
     dest2id = model['dest2id'].values
     source2id = model['source2id'].values
     
+    print(Psi_sz)
+    print(Psi_dz)
+
     from collections import Counter
     counter = Counter(assign)
     print(len(counter))

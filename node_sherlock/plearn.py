@@ -262,6 +262,7 @@ def fetch_results(comm, num_workers, workloads, tstamps, Trace, \
         P += P_buff
     
     P[:] = P / num_workers
+    kernel.update_state(P)
     Theta_zh[:] = 0
     Psi_sz[:] = 0
     Psi_dz[:] = 0

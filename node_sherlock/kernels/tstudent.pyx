@@ -88,6 +88,9 @@ cdef class TStudentKernel(Kernel):
             c = self.cte[self.cte.shape[0] - 1] / sigma
 
         return c * (1 + (1 / v) * (((x - mu) / sigma) ** 2)) ** -((v + 1) / 2)
+    
+    def _pdf(self, x, z, stamps):
+        return self.pdf(x, z, stamps)
 
     cdef void mstep(self, StampLists stamps) nogil:
         
