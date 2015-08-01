@@ -18,6 +18,9 @@ cdef int MAX_FREE = 71
 cdef extern from 'math.h':
     double sqrt(double) nogil
 
+cdef extern from 'stdio.h':
+    int printf(char *, ...) nogil
+
 cdef class TStudentKernel(Kernel):
     
     cdef double[::1] cte
@@ -109,6 +112,12 @@ cdef class TStudentKernel(Kernel):
         cdef int i
         for z in xrange(nz):
             n = stamps.size(z)
+            if n == 0:
+                self.P[z, 0] = mu0
+                self.P[z, 1] = v0
+                self.P[z, 2] = sigma0
+                break
+
             obs = stamps.get_all(z)
             mean = 0.0
             ssq = 0.0
@@ -116,7 +125,6 @@ cdef class TStudentKernel(Kernel):
             for i in xrange(n):
                 mean += obs[i]
             mean = mean / n
-            
             for i in xrange(n):
                 ssq += (obs[i] - mean) ** 2
 
