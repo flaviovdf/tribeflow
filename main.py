@@ -13,6 +13,7 @@ import argparse
 import multiprocessing
 import numpy as np
 import os
+import time
 
 def main():
     parser = argparse.ArgumentParser()
@@ -31,7 +32,7 @@ def main():
             default=300)
     
     parser.add_argument('--dynamic', \
-            help='If we should employ the dynamic strategy (only works with mpi)', \
+            help='If we should employ the dynamic strategy', \
             type=bool, default=False)
     parser.add_argument('--num_batches', \
             help='Number of batches in dynamic case', type=int, default=10)
@@ -69,6 +70,7 @@ def main():
     if not single_thread and rank != plearn.MASTER:
         plearn.work()
     else:
+        started = time.mktime(time.localtime())
         num_lines = 0
         with open(args.trace_fpath) as trace_file:
             num_lines = sum(1 for _ in trace_file)
@@ -102,24 +104,31 @@ def main():
         
         if single_thread:
             print('Not on MPI mode or just one MPI proc, running single thread')
-            rv = learn.fit(args.trace_fpath, args.num_topics, alpha_zh, \
-                    args.beta_zs, args.beta_zd, kernel, residency_priors, \
-                    args.num_iter, args.burn_in, from_=from_, to=to)
-            dataio.save_model(args.model_fpath, rv)
-        else:
-            comm = MPI.COMM_WORLD
-            rank = comm.rank
             dyn = args.dynamic
             if dyn:
                 num_iter = args.num_iter // args.num_batches
                 rv = dynamic.fit(args.trace_fpath, args.num_topics, alpha_zh, \
                         args.beta_zs, args.beta_zd, kernel, residency_priors, \
-                        num_iter, args.num_batches, from_=from_, to=to)
+                        num_iter, args.num_batches, False, from_=from_, to=to)
+            else:
+                rv = learn.fit(args.trace_fpath, args.num_topics, alpha_zh, \
+                        args.beta_zs, args.beta_zd, kernel, residency_priors, \
+                        args.num_iter, args.burn_in, from_=from_, to=to)
+            dataio.save_model(args.model_fpath, rv)
+        else:
+            dyn = args.dynamic
+            if dyn:
+                num_iter = args.num_iter // args.num_batches
+                rv = dynamic.fit(args.trace_fpath, args.num_topics, alpha_zh, \
+                        args.beta_zs, args.beta_zd, kernel, residency_priors, \
+                        num_iter, args.num_batches, True, from_=from_, to=to)
             else:
                 rv = plearn.fit(args.trace_fpath, args.num_topics, alpha_zh, \
                         args.beta_zs, args.beta_zd, kernel, residency_priors, \
                         args.num_iter, from_=from_, to=to)
             dataio.save_model(args.model_fpath, rv)
+        ended = time.mktime(time.localtime())
+        print('Learning took', ended - started, 'seconds')
 
 if __name__ == '__main__':
     main()

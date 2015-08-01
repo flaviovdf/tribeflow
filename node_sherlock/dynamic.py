@@ -311,7 +311,7 @@ def merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, Count_dz, \
     return finalize_merge(nz, accepted, tstamps, Trace, nh, ns, nd, kernel) 
 
 def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
-        residency_priors, num_iter, num_batches, from_=0, to=np.inf):
+        residency_priors, num_iter, num_batches, mpi_mode, from_=0, to=np.inf):
     '''
     Learns the latent topics from a temporal hypergraph trace. Here we do a
     asynchronous learning of the topics similar to AD-LDA, as well as the 
@@ -364,23 +364,31 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
             dataio.initialize_trace(trace_fpath, num_topics, num_iter, \
             from_, to)
     
-    workloads = generate_workload(Count_zh.shape[1], num_workers, Trace)
+    if mpi_mode:
+        workloads = generate_workload(Count_zh.shape[1], num_workers, Trace)
     all_idx = np.arange(Trace.shape[0], dtype='i4')
     
     for batch in xrange(num_batches):
         print('Now at batch', batch)
         for worker_id in xrange(1, num_workers + 1):
             comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
-    
-        dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, Count_dz, count_h, \
-                count_z, alpha_zh, beta_zs, beta_zd, kernel, residency_priors, \
-                workloads, num_workers, comm)
-        manage(comm, num_workers)
-        fetch_results(comm, num_workers, workloads, tstamps, Trace, \
-                previous_stamps, Count_zh, Count_sz, Count_dz, count_h, \
-                count_z, alpha_zh, beta_zs, beta_zd, Theta_zh, Psi_sz, \
-                Psi_dz, kernel)
 
+        if mpi_mode:
+            dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, Count_dz, \
+                    count_h, count_z, alpha_zh, beta_zs, beta_zd, kernel, \
+                    residency_priors, workloads, num_workers, comm)
+            manage(comm, num_workers)
+            fetch_results(comm, num_workers, workloads, tstamps, Trace, \
+                    previous_stamps, Count_zh, Count_sz, Count_dz, count_h, \
+                    count_z, alpha_zh, beta_zs, beta_zd, Theta_zh, Psi_sz, \
+                    Psi_dz, kernel)
+        else:
+            prob_topics_aux = np.zeros(Count_zh.shape[0], dtype='f8')
+            _learn.em(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
+                    Count_dz, count_h, count_z, alpha_zh, beta_zs, beta_zd, \
+                    prob_topics_aux, Theta_zh, Psi_sz, Psi_dz, num_iter, \
+                    num_iter * 2, kernel)
+        
         print('Split')
         ll_per_z = np.zeros(count_z.shape[0], dtype='f8')
         _learn.quality_estimate(tstamps, Trace, previous_stamps, \
