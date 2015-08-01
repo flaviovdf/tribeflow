@@ -102,9 +102,6 @@ def main():
         
         if single_thread:
             print('Not on MPI mode or just one MPI proc, running single thread')
-            single_thread = True
-
-        if single_thread:
             rv = learn.fit(args.trace_fpath, args.num_topics, alpha_zh, \
                     args.beta_zs, args.beta_zd, kernel, residency_priors, \
                     args.num_iter, args.burn_in, from_=from_, to=to)
