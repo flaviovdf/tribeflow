@@ -33,12 +33,13 @@ def paired_update(comm, previous_encounters_s, previous_encounters_d, \
         Count_sz_others, Count_dz_others, P_local, P_pair):
     
     rank = comm.rank
-    comm.send(rank, dest=MASTER, tag=Msg.PAIRME.value)
+    comm.isend(rank, dest=MASTER, tag=Msg.PAIRME.value)
     pair_id = comm.recv(source=MASTER, tag=Msg.PAIRED.value)
     
     if pair_id == rank: #Paired with self, do nothing
-        comm.send(rank, dest=MASTER, tag=Msg.PAIRDONE.value)
-        return
+        comm.isend(rank, dest=MASTER, tag=Msg.PAIRDONE.value)
+        return False
+    
     elif pair_id < rank:
         comm.Recv([Count_sz_pair, MPI.INT], source=pair_id)
         comm.Recv([Count_dz_pair, MPI.INT], source=pair_id)
@@ -68,7 +69,8 @@ def paired_update(comm, previous_encounters_s, previous_encounters_d, \
     N_til_d[:] = Count_dz_pair
     P_local[:] = (P_local + P_pair) / 2.0
     
-    comm.send(rank, dest=MASTER, tag=Msg.PAIRDONE.value)
+    comm.isend(rank, dest=MASTER, tag=Msg.PAIRDONE.value)
+    return True
 
 def receive_workload(comm):
     sizes = np.zeros(6, dtype='i')
@@ -142,7 +144,8 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, Count_dz_local, \
     Theta_zh = np.zeros_like(Count_zh, dtype='f8')
     Psi_sz = np.zeros_like(Count_sz_local, dtype='f8')
     Psi_dz = np.zeros_like(Count_dz_local, dtype='f8')
-
+    
+    can_pair = True
     for i in xrange(num_iter):
         #Sample from the local counts and encountered counts
         Count_sz_sum[:] = Count_sz_local + Count_sz_others
@@ -157,12 +160,13 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, Count_dz_local, \
         Count_dz_local[:] = Count_dz_sum - Count_dz_others
         
         #Update expected belief of other processors
-        P_local = kernel.get_state()
-        paired_update(comm, previous_encounters_s, \
-                previous_encounters_d, Count_sz_local, Count_dz_local, \
-                Count_sz_pair, Count_dz_pair, Count_sz_others, Count_dz_others, \
-                P_local, np.zeros_like(P_local))
-        kernel.update_state(P_local)
+        if can_pair:
+            P_local = kernel.get_state()
+            can_pair = paired_update(comm, previous_encounters_s, \
+                    previous_encounters_d, Count_sz_local, Count_dz_local, \
+                    Count_sz_pair, Count_dz_pair, Count_sz_others, \
+                    Count_dz_others, P_local, np.zeros_like(P_local))
+            kernel.update_state(P_local)
 
 def work():
     comm = MPI.COMM_WORLD
@@ -173,7 +177,7 @@ def work():
         event = status.Get_tag()
 
         if event == Msg.LEARN.value:
-            comm.send(rank, dest=MASTER, tag=Msg.STARTED.value)
+            comm.isend(rank, dest=MASTER, tag=Msg.STARTED.value)
 
             num_iter = msg
 
@@ -185,7 +189,7 @@ def work():
                     count_z, alpha_zh, beta_zs, beta_zd, kernel, num_iter, \
                     comm)
             
-            comm.send(rank, dest=MASTER, tag=Msg.FINISHED.value)
+            comm.isend(rank, dest=MASTER, tag=Msg.FINISHED.value)
         elif event == Msg.SENDRESULTS.value:
             comm.Send([np.array(Trace[:, -1], order='C'), MPI.INT], dest=MASTER)
             comm.Send([Count_zh, MPI.INT], dest=MASTER)
@@ -236,7 +240,7 @@ def fetch_results(comm, num_workers, workloads, tstamps, Trace, \
     P_buff = np.zeros_like(P)
         
     for worker_id in xrange(1, num_workers + 1):
-        comm.send(worker_id, dest=worker_id, tag=Msg.SENDRESULTS.value)
+        comm.isend(worker_id, dest=worker_id, tag=Msg.SENDRESULTS.value)
         
         idx = workloads[worker_id - 1]
         assign = np.zeros(Trace[idx].shape[0], dtype='i')
@@ -299,12 +303,12 @@ def manage(comm, num_workers):
         
         elif event == Msg.PAIRME.value:
             if sum(finished.values()) == num_workers - 1: #only 1 working, pair with self
-                comm.send(worker_id, dest=worker_id, tag=Msg.PAIRED.value)
+                comm.isend(worker_id, dest=worker_id, tag=Msg.PAIRED.value)
             else:
                 paired = find_a_pair(available_to_pair, pairs, worker_id)
                 if paired[0]:
-                    comm.send(paired[1], dest=worker_id, tag=Msg.PAIRED.value)
-                    comm.send(worker_id, dest=paired[1], tag=Msg.PAIRED.value)
+                    comm.isend(paired[1], dest=worker_id, tag=Msg.PAIRED.value)
+                    comm.isend(worker_id, dest=paired[1], tag=Msg.PAIRED.value)
 
         elif event == Msg.PAIRDONE.value:
             pairs[worker_id] = -1
@@ -326,7 +330,7 @@ def manage(comm, num_workers):
                 assert last_one is not None
 
                 if available_to_pair[last_one] and pairs[last_one] == -1:
-                    comm.send(last_one, dest=last_one, tag=Msg.PAIRED.value)
+                    comm.isend(last_one, dest=last_one, tag=Msg.PAIRED.value)
         else:
             print(0, 'Unknown message received', msg, event, Msg(event))
 
@@ -431,7 +435,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
     
     workloads = generate_workload(Count_zh.shape[1], num_workers, Trace)
     for worker_id in xrange(1, num_workers + 1):
-        comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
+        comm.isend(num_iter, dest=worker_id, tag=Msg.LEARN.value)
     
     dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, Count_dz, count_h, \
             count_z, alpha_zh, beta_zs, beta_zd, kernel, residency_priors, \
@@ -442,7 +446,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
             beta_zs, beta_zd, Theta_zh, Psi_sz, Psi_dz, kernel)
 
     for worker_id in xrange(1, num_workers + 1):
-        comm.send(worker_id, dest=worker_id, tag=Msg.STOP.value)
+        comm.isend(worker_id, dest=worker_id, tag=Msg.STOP.value)
 
     rv = prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
             beta_zd, kernel, residency_priors, num_iter, -1, tstamps, \

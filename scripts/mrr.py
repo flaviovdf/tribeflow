@@ -53,7 +53,6 @@ def main(model):
     trace_size = sum(count_z)
     kernel = kernel_class()
     kernel.build(trace_size, count_z.shape[0], residency_priors)
-    print(P)
     kernel.update_state(P)
 
     HSDs = np.array(HSDs, dtype='i4')

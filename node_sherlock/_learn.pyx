@@ -353,15 +353,13 @@ def mean_reciprocal_rank(double[::1] tstamps, int[:, ::1] HSDs, \
             for candidate_d in xrange(Psi_dz.shape[0]):
                 aux_base[candidate_d] += count_z[z] * Psi_sz[s, z] * \
                         Psi_dz[candidate_d, z] 
-            
                 aux_delta[candidate_d] += count_z[z] * Psi_sz[s, z] * \
                         Psi_dz[candidate_d, z] * \
                         kernel.pdf(dt, z, previous_stamps)
-            
                 aux_full[candidate_d] += Psi_sz[s, z] * \
                         Psi_dz[candidate_d, z] * Theta_zh[z, h] * \
                         kernel.pdf(dt, z, previous_stamps)
-
+        
         gt_base = 0.0
         gt_delta = 0.0
         gt_full = 0.0
@@ -376,7 +374,7 @@ def mean_reciprocal_rank(double[::1] tstamps, int[:, ::1] HSDs, \
             if aux_full[candidate_d] >= aux_full[real_d]:
                 gt_full += 1
 
-        mrr_base += 1.0 / gt_full
+        mrr_base += 1.0 / gt_base
         mrr_delta += 1.0 / gt_delta
         mrr_full += 1.0 / gt_full
 

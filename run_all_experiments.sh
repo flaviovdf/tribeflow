@@ -1,19 +1,19 @@
 #!/bin/bash
 
-NUM_THREADS=16
+NUM_THREADS=3
 NUM_TOPIC_INITIAL=100
 NUM_ITER=2000
 NUM_BATCHES=20
-HOSTS=150.164.11.81,150.164.11.88
+HOSTS=localhost
 
 #mu0 v0 sigma0
 PRIORS_NRM_LOC=(7200 1 720) #location data
 PRIORS_NRM_LFM_YOO=(300 1 30) #other data
 
-OUT_FOLDER=/data/users/flaviov/iflux/models
+OUT_FOLDER=models
 mkdir $OUT_FOLDER 2> /dev/null
 
-IN_FOLDER=/data/users/flaviov/iflux/traces
+IN_FOLDER=traces/small
 
 #1. Run the trace with the NormalKernel
 for f in $IN_FOLDER/*.dat; do

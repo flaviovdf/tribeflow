@@ -83,8 +83,8 @@ cdef class TStudentKernel(Kernel):
         cdef double c = 1.0
 
         cdef int free = <int>v
-        if free < 0:
-            c = 0.0
+        if free <= 0:
+            return 0.0
         elif free < self.cte.shape[0]:
             c = self.cte[free] / sigma
         else:
@@ -98,7 +98,7 @@ cdef class TStudentKernel(Kernel):
     cdef void mstep(self, StampLists stamps) nogil:
         
         cdef int nz = self.P.shape[0]
-
+        
         cdef double mu0 = self.priors[0]
         cdef double v0 = self.priors[1]
         cdef double sigma0 = self.priors[2]
