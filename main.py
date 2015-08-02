@@ -114,7 +114,6 @@ def main():
                 rv = learn.fit(args.trace_fpath, args.num_topics, alpha_zh, \
                         args.beta_zs, args.beta_zd, kernel, residency_priors, \
                         args.num_iter, args.burn_in, from_=from_, to=to)
-            dataio.save_model(args.model_fpath, rv)
         else:
             dyn = args.dynamic
             if dyn:
@@ -126,8 +125,10 @@ def main():
                 rv = plearn.fit(args.trace_fpath, args.num_topics, alpha_zh, \
                         args.beta_zs, args.beta_zd, kernel, residency_priors, \
                         args.num_iter, from_=from_, to=to)
-            dataio.save_model(args.model_fpath, rv)
+        
         ended = time.mktime(time.localtime())
+        rv['training_time'] = np.array([ended - started])
+        dataio.save_model(args.model_fpath, rv)
         print('Learning took', ended - started, 'seconds')
 
 if __name__ == '__main__':
