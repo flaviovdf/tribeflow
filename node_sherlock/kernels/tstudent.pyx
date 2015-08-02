@@ -62,7 +62,7 @@ cdef class TStudentKernel(Kernel):
             self.P[i, 0] = priors[0]
             self.P[i, 1] = priors[1]
             self.P[i, 2] = priors[2]
-        self.priors = priors
+        self.priors = np.array(priors, copy=True)
 
     def get_priors(self):
         return np.array(self.priors)
@@ -83,7 +83,7 @@ cdef class TStudentKernel(Kernel):
         cdef double c = 1.0
 
         cdef int free = <int>v
-        if free <= 0:
+        if free <= 0 or sigma == 0:
             return 0.0
         elif free < self.cte.shape[0]:
             c = self.cte[free] / sigma

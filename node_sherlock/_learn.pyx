@@ -350,6 +350,7 @@ def mean_reciprocal_rank(double[::1] tstamps, int[:, ::1] HSDs, \
             aux_full[candidate_d] = 0.0
 
         for z in xrange(Psi_dz.shape[1]):
+            print(z, kernel.pdf(dt, z, previous_stamps))
             for candidate_d in xrange(Psi_dz.shape[0]):
                 aux_base[candidate_d] += count_z[z] * Psi_sz[s, z] * \
                         Psi_dz[candidate_d, z] 

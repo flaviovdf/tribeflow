@@ -102,7 +102,7 @@ def receive_workload(comm):
     beta_zs = priors[1]
     beta_zd = priors[2]
     residency_priors = priors[3:]
-
+    print(priors)
     kernel_class = comm.recv(source=MASTER)
     P = np.zeros(shape=(nz, n_residency_priors), dtype='f8')
     comm.Recv([P, MPI.DOUBLE], source=MASTER)
@@ -186,7 +186,8 @@ def work():
             num_iter = msg
 
             tstamps, Trace, Count_zh, Count_sz, Count_dz, count_h, count_z, \
-                    alpha_zh, beta_zs, beta_zd, kernel = receive_workload(comm)
+                    alpha_zh, beta_zs, beta_zd, kernel = \
+                    receive_workload(comm)
             fast_populate(Trace, Count_zh, Count_sz, Count_dz, count_h, \
                     count_z)
             sample(tstamps, Trace, Count_zh, Count_sz, Count_dz, count_h, \
@@ -343,7 +344,7 @@ def dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, Count_dz, count_h, \
         priors[2] = beta_zd
         priors[3:] = residency_priors
 
-        comm.Send([residency_priors, MPI.DOUBLE], dest=worker_id)
+        comm.Send([priors, MPI.DOUBLE], dest=worker_id)
         comm.send(kernel.__class__, dest=worker_id)
         comm.Send([kernel.get_state(), MPI.DOUBLE], dest=worker_id) 
 

@@ -370,10 +370,11 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
     
     for batch in xrange(num_batches):
         print('Now at batch', batch)
-        for worker_id in xrange(1, num_workers + 1):
-            comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
-
         if mpi_mode:
+            for worker_id in xrange(1, num_workers + 1):
+                comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
+
+            print(residency_priors)
             dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, Count_dz, \
                     count_h, count_z, alpha_zh, beta_zs, beta_zd, kernel, \
                     residency_priors, workloads, num_workers, comm)
@@ -425,8 +426,9 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
     	    _learn._aggregate(Count_zh, Count_sz, Count_dz, count_h, count_z, \
                 alpha_zh, beta_zs, beta_zd, Theta_zh, Psi_sz, Psi_dz)
     
-    for worker_id in xrange(1, num_workers + 1):
-        comm.send(num_iter, dest=worker_id, tag=Msg.STOP.value)
+    if mpi_mode:
+        for worker_id in xrange(1, num_workers + 1):
+            comm.send(num_iter, dest=worker_id, tag=Msg.STOP.value)
     
     rv = prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, \
             kernel, residency_priors, num_iter, -1, tstamps, Trace, \
