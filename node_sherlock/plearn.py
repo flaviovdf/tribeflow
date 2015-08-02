@@ -312,7 +312,7 @@ def manage(comm, num_workers):
             num_finished += 1
             
             #wake up last worker if it's waiting for a pair
-            if available_to_pair != -1:
+            if num_finished == num_workers - 1 and available_to_pair != -1:
                 comm.isend(available_to_pair, dest=available_to_pair, \
                         tag=Msg.PAIRED.value)
         else:
