@@ -102,7 +102,6 @@ def receive_workload(comm):
     beta_zs = priors[1]
     beta_zd = priors[2]
     residency_priors = priors[3:]
-    print(priors)
     kernel_class = comm.recv(source=MASTER)
     P = np.zeros(shape=(nz, n_residency_priors), dtype='f8')
     comm.Recv([P, MPI.DOUBLE], source=MASTER)

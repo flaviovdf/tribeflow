@@ -374,7 +374,6 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
             for worker_id in xrange(1, num_workers + 1):
                 comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
 
-            print(residency_priors)
             dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, Count_dz, \
                     count_h, count_z, alpha_zh, beta_zs, beta_zd, kernel, \
                     residency_priors, workloads, num_workers, comm)
