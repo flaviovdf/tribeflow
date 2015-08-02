@@ -21,12 +21,14 @@ from node_sherlock import StampLists
 
 from mpi4py import MPI
 
+import cProfile
 import numpy as np
 import time
 
-Msg = Enum('Msg', ['STARTED', 'FINISHED', 'PAIRME', 'PAIRDONE', 'PAIRED', \
+Msg = Enum('Msg', ['STARTED', 'FINISHED', 'PAIRME', 'PAIRED', \
         'LEARN', 'SENDRESULTS', 'STOP'])
 MASTER = 0
+CACHE_SIZE = 10
 
 def paired_update(comm, previous_encounters_s, previous_encounters_d, \
         Count_sz_local, Count_dz_local, Count_sz_pair, Count_dz_pair, \
@@ -37,7 +39,6 @@ def paired_update(comm, previous_encounters_s, previous_encounters_d, \
     pair_id = comm.recv(source=MASTER, tag=Msg.PAIRED.value)
     
     if pair_id == rank: #Paired with self, do nothing
-        comm.isend(rank, dest=MASTER, tag=Msg.PAIRDONE.value)
         return False
     
     elif pair_id < rank:
@@ -69,7 +70,6 @@ def paired_update(comm, previous_encounters_s, previous_encounters_d, \
     N_til_d[:] = Count_dz_pair
     P_local[:] = (P_local + P_pair) / 2.0
     
-    comm.isend(rank, dest=MASTER, tag=Msg.PAIRDONE.value)
     return True
 
 def receive_workload(comm):
@@ -146,14 +146,14 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, Count_dz_local, \
     Psi_dz = np.zeros_like(Count_dz_local, dtype='f8')
     
     can_pair = True
-    for i in xrange(num_iter):
+    for i in xrange(num_iter // CACHE_SIZE):
         #Sample from the local counts and encountered counts
         Count_sz_sum[:] = Count_sz_local + Count_sz_others
         Count_dz_sum[:] = Count_dz_local + Count_dz_others
         
         em(tstamps, Trace, stamps, Count_zh, Count_sz_sum, Count_dz_sum, \
                 count_h, count_z, alpha_zh, beta_zs, beta_zd, aux, Theta_zh, \
-                Psi_sz, Psi_dz, 1, 2, kernel)
+                Psi_sz, Psi_dz, CACHE_SIZE, CACHE_SIZE * 2, kernel)
 
         #Update local counts
         Count_sz_local[:] = Count_sz_sum - Count_sz_others
@@ -171,6 +171,10 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, Count_dz_local, \
 def work():
     comm = MPI.COMM_WORLD
     rank = comm.rank
+    
+    #pr = cProfile.Profile()
+    #pr.enable()
+
     while True:
         status = MPI.Status()
         msg = comm.recv(source=MASTER, tag=MPI.ANY_TAG, status=status)
@@ -203,18 +207,8 @@ def work():
         else:
             print('Unknown message received', msg, event, Msg(event))
 
-def find_a_pair(available_to_pair, pairs, worker_id):
-    for i in available_to_pair:
-        if available_to_pair[i]:
-            available_to_pair[i] = False
-            available_to_pair[worker_id] = False
-
-            pairs[i] = worker_id
-            pairs[worker_id] = i
-            return True, i
-
-    available_to_pair[worker_id] = True
-    return False, -1
+    #pr.disable()
+    #pr.dump_stats('worker-%d.pstats' % rank)
 
 def fetch_results(comm, num_workers, workloads, tstamps, Trace, \
         previous_stamps, Count_zh, Count_sz, Count_dz, count_h, count_z, \
@@ -283,16 +277,14 @@ def fetch_results(comm, num_workers, workloads, tstamps, Trace, \
         previous_stamps._extend(z, tstamps[Trace[:, -1] == z])
 
 def manage(comm, num_workers):
-    available_to_pair = {}
-    pairs = {}
+    available_to_pair = -1
     finished = {}
+    num_finished = 0
     
     for worker_id in xrange(1, num_workers + 1):
-        available_to_pair[worker_id] = False
-        pairs[worker_id] = -1
         finished[worker_id] = False
 
-    while sum(finished.values()) != num_workers:
+    while num_finished != num_workers:
         status = MPI.Status()
         worker_id = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, \
                 status=status)
@@ -302,37 +294,29 @@ def manage(comm, num_workers):
             print('Worker', worker_id, 'is working!')
         
         elif event == Msg.PAIRME.value:
-            if sum(finished.values()) == num_workers - 1: #only 1 working, pair with self
+            if num_finished == num_workers - 1: #only 1 working, pair with self
                 comm.isend(worker_id, dest=worker_id, tag=Msg.PAIRED.value)
             else:
-                paired = find_a_pair(available_to_pair, pairs, worker_id)
-                if paired[0]:
-                    comm.isend(paired[1], dest=worker_id, tag=Msg.PAIRED.value)
-                    comm.isend(worker_id, dest=paired[1], tag=Msg.PAIRED.value)
-
-        elif event == Msg.PAIRDONE.value:
-            pairs[worker_id] = -1
-            available_to_pair[worker_id] = False
-        
+                assert available_to_pair != worker_id
+                if available_to_pair == -1:
+                    available_to_pair = worker_id
+                else:
+                    comm.isend(available_to_pair, dest=worker_id, \
+                            tag=Msg.PAIRED.value)
+                    comm.isend(worker_id, dest=available_to_pair, \
+                            tag=Msg.PAIRED.value)
+                    available_to_pair = -1
         elif event == Msg.FINISHED.value:
             print('Worker', worker_id, 'has finished it\'s iterations!')
-            del available_to_pair[worker_id]
-            del pairs[worker_id]
             finished[worker_id] = True
+            num_finished += 1
             
             #wake up last worker if it's waiting for a pair
-            if sum(finished.values()) == num_workers - 1:
-                last_one = None
-                for candidate in finished:
-                    if finished[candidate] == False:
-                        last_one = candidate
-                
-                assert last_one is not None
-
-                if available_to_pair[last_one] and pairs[last_one] == -1:
-                    comm.isend(last_one, dest=last_one, tag=Msg.PAIRED.value)
+            if available_to_pair != -1:
+                comm.isend(available_to_pair, dest=available_to_pair, \
+                        tag=Msg.PAIRED.value)
         else:
-            print(0, 'Unknown message received', msg, event, Msg(event))
+            print(0, 'Unknown message received', worker_id, event, Msg(event))
 
 def dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, Count_dz, count_h, \
         count_z, alpha_zh, beta_zs, beta_zd, kernel, residency_priors, \
