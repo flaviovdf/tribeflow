@@ -15,6 +15,9 @@ from Cython.Distutils import build_ext
 SOURCE = '.'
 os.chdir(SOURCE)
 
+#os.environ["CC"] = "gcc-5"
+#os.environ["CXX"] = "gcc-5"
+
 if sys.version_info[:2] < (2, 7):
     print('Requires Python version 2.7 or later (%d.%d detected).' %
           sys.version_info[:2])
@@ -66,7 +69,8 @@ def get_extensions():
             extension = Extension(module, ext_files,
                     include_dirs=include_dirs,
                     extra_compile_args=['-msse', '-msse2', '-mfpmath=sse', \
-                            '-Wno-unused-function']) #cython warnings supress
+                            '-fopenmp', '-Wno-unused-function'], #cython warnings supress
+                    extra_link_args=['-fopenmp'])
 
             extensions.append(extension)
 
