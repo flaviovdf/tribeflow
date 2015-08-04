@@ -419,7 +419,8 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
     
     workloads = generate_workload(Count_zh.shape[1], num_workers, Trace)
     for worker_id in xrange(1, num_workers + 1):
-        comm.isend(num_iter, dest=worker_id, tag=Msg.LEARN.value)
+        print(worker_id, num_iter)
+        comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
     
     dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, Count_dz, count_h, \
             count_z, alpha_zh, beta_zs, beta_zd, kernel, residency_priors, \
@@ -430,7 +431,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
             beta_zs, beta_zd, Theta_zh, Psi_sz, Psi_dz, kernel)
 
     for worker_id in xrange(1, num_workers + 1):
-        comm.isend(worker_id, dest=worker_id, tag=Msg.STOP.value)
+        comm.send(worker_id, dest=worker_id, tag=Msg.STOP.value)
 
     rv = prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
             beta_zd, kernel, residency_priors, num_iter, -1, tstamps, \
