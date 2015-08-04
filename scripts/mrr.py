@@ -8,7 +8,7 @@ import pandas as pd
 import plac
 import numpy as np
 
-def main(model):
+def main(model, out_fpath):
     store = pd.HDFStore(model)
     
     from_ = store['from_'][0][0]
@@ -54,13 +54,16 @@ def main(model):
     kernel = kernel_class()
     kernel.build(trace_size, count_z.shape[0], residency_priors)
     kernel.update_state(P)
+    
+    num_queries = min(30000, len(HSDs))
+    queries = np.random.choice(len(HSDs), size=num_queries)
 
-    HSDs = np.array(HSDs, dtype='i4')
-    tstamps = np.array(tstamps, dtype='d')
-    mrr_base, mrr_delta, mrr_full = _learn.mean_reciprocal_rank(tstamps, \
+    HSDs = np.array(HSDs, dtype='i4')[queries].copy()
+    tstamps = np.array(tstamps, dtype='d')[queries].copy()
+    rrs = _learn.mean_reciprocal_rank(tstamps, \
             HSDs, previous_stamps, Theta_zh, Psi_sz, Psi_dz, count_z, kernel)
     
-    print(mrr_base, mrr_delta, mrr_full)
+    np.savetxt(out_fpath, rrs)
     store.close()
     
 plac.call(main)

@@ -7,6 +7,8 @@
 
 from __future__ import division, print_function
 
+from cython.parallel cimport prange
+
 from node_sherlock._stamp_lists cimport StampLists
 from node_sherlock.myrandom.random cimport rand
 from node_sherlock.kernels.base cimport Kernel
@@ -329,14 +331,7 @@ def mean_reciprocal_rank(double[::1] tstamps, int[:, ::1] HSDs, \
     cdef double[::1] aux_delta = np.zeros(Psi_dz.shape[0], dtype='d')
     cdef double[::1] aux_full = np.zeros(Psi_dz.shape[0], dtype='d')
     
-    cdef double gt_base = 0
-    cdef double gt_delta = 0
-    cdef double gt_full = 0
-
-    cdef double mrr_base = 0
-    cdef double mrr_delta = 0
-    cdef double mrr_full = 0
-    
+    cdef double[:, ::1] rrs = np.zeros(shape=(HSDs.shape[0], 3), dtype='d')
     cdef int i = 0
     for i in xrange(HSDs.shape[0]):
         dt = tstamps[i]
@@ -344,14 +339,13 @@ def mean_reciprocal_rank(double[::1] tstamps, int[:, ::1] HSDs, \
         s = HSDs[i, 1]
         real_d = HSDs[i, 2]
         
-        for candidate_d in xrange(Psi_dz.shape[0]):
+        for candidate_d in prange(Psi_dz.shape[0], schedule='static', nogil=True):
             aux_base[candidate_d] = 0.0
             aux_delta[candidate_d] = 0.0
             aux_full[candidate_d] = 0.0
 
         for z in xrange(Psi_dz.shape[1]):
-            print(z, kernel.pdf(dt, z, previous_stamps))
-            for candidate_d in xrange(Psi_dz.shape[0]):
+            for candidate_d in prange(Psi_dz.shape[0], schedule='static', nogil=True):
                 aux_base[candidate_d] += count_z[z] * Psi_sz[s, z] * \
                         Psi_dz[candidate_d, z] 
                 aux_delta[candidate_d] += count_z[z] * Psi_sz[s, z] * \
@@ -361,25 +355,18 @@ def mean_reciprocal_rank(double[::1] tstamps, int[:, ::1] HSDs, \
                         Psi_dz[candidate_d, z] * Theta_zh[z, h] * \
                         kernel.pdf(dt, z, previous_stamps)
         
-        gt_base = 0.0
-        gt_delta = 0.0
-        gt_full = 0.0
-
-        for candidate_d in xrange(Psi_dz.shape[0]):
+        for candidate_d in prange(Psi_dz.shape[0], schedule='static', nogil=True):
             if aux_base[candidate_d] >= aux_base[real_d]:
-                gt_base += 1
+                rrs[i, 0] += 1
 
             if aux_delta[candidate_d] >= aux_delta[real_d]:
-                gt_delta += 1
+                rrs[i, 1] += 1
 
             if aux_full[candidate_d] >= aux_full[real_d]:
-                gt_full += 1
-
-        mrr_base += 1.0 / gt_base
-        mrr_delta += 1.0 / gt_delta
-        mrr_full += 1.0 / gt_full
-
-    mrr_base = mrr_base / HSDs.shape[0]
-    mrr_delta = mrr_delta / HSDs.shape[0]
-    mrr_full = mrr_full / HSDs.shape[0]
-    return mrr_base, mrr_delta, mrr_full
+                rrs[i, 2] += 1
+        
+        rrs[i, 0] = 1.0 / rrs[i, 0]
+        rrs[i, 1] = 1.0 / rrs[i, 1]
+        rrs[i, 2] = 1.0 / rrs[i, 2]
+    
+    return np.array(rrs)
