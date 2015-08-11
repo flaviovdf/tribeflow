@@ -68,8 +68,8 @@ def main():
             t_prev, o_prev = last[h_now]
             if o_prev == o_now and not consider_loops:
                 continue
-            print(t_now - t_prev, h_now.strip(), o_prev.strip(), \
-                    o_now.strip(), sep='\t')
+            print(t_now - t_prev, h_now.strip(), o_now.strip(), \
+                    sep='\t')
         last[h_now] = (t_now, o_now)
 
 if __name__ == '__main__':

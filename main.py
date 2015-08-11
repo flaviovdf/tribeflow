@@ -42,8 +42,6 @@ def main():
             type=float, default=None)
     parser.add_argument('--beta_zs', help='Value of beta_zs (beta) hyper', \
             type=float, default=0.001)
-    parser.add_argument('--beta_zd', help='Value of beta_zd (beta\') hyper', \
-            type=float, default=0.001)
     
     parser.add_argument('--kernel', choices=kernels.names,
             help='The kernel to use', type=str, default='noop')
@@ -108,23 +106,23 @@ def main():
             if dyn:
                 num_iter = args.num_iter // args.num_batches
                 rv = dynamic.fit(args.trace_fpath, args.num_topics, alpha_zh, \
-                        args.beta_zs, args.beta_zd, kernel, residency_priors, \
+                        args.beta_zs, kernel, residency_priors, \
                         num_iter, args.num_batches, False, from_=from_, to=to)
             else:
                 rv = learn.fit(args.trace_fpath, args.num_topics, alpha_zh, \
-                        args.beta_zs, args.beta_zd, kernel, residency_priors, \
+                        args.beta_zs, kernel, residency_priors, \
                         args.num_iter, args.burn_in, from_=from_, to=to)
         else:
             dyn = args.dynamic
             if dyn:
                 num_iter = args.num_iter // args.num_batches
                 rv = dynamic.fit(args.trace_fpath, args.num_topics, alpha_zh, \
-                        args.beta_zs, args.beta_zd, kernel, residency_priors, \
-                        num_iter, args.num_batches, True, from_=from_, to=to)
+                        args.beta_zs, kernel, residency_priors, num_iter, \
+                        args.num_batches, True, from_=from_, to=to)
             else:
                 rv = plearn.fit(args.trace_fpath, args.num_topics, alpha_zh, \
-                        args.beta_zs, args.beta_zd, kernel, residency_priors, \
-                        args.num_iter, from_=from_, to=to)
+                        args.beta_zs, kernel, residency_priors, args.num_iter, \
+                        from_=from_, to=to)
         
         ended = time.mktime(time.localtime())
         rv['training_time'] = np.array([ended - started])

@@ -9,8 +9,12 @@ from __future__ import division, print_function
 
 from cython.parallel cimport prange
 
-from node_sherlock._stamp_lists cimport StampLists
+from node_sherlock.mycollections.llist cimport MarkovianMemory
+from node_sherlock.mycollections.llist cimport Node
+from node_sherlock.mycollections.stamp_lists cimport StampLists
 from node_sherlock.myrandom.random cimport rand
+from node_sherlock.sorting.binsearch cimport bsp
+
 from node_sherlock.kernels.base cimport Kernel
 
 import numpy as np
@@ -21,92 +25,51 @@ cdef extern from 'math.h':
 cdef extern from 'stdio.h':
     int printf(char *, ...) nogil
 
-cdef int bsp(double *array, double value, int n) nogil:
-    '''
-    Finds the first element in the array where the given is OR should have been
-    in the given array. This is simply a binary search, but if the element is
-    not found we return the index where it should have been at.
-    '''
-
-    cdef int lower = 0
-    cdef int upper = n - 1 #closed interval
-    cdef int half = 0
-    cdef int idx = -1 
- 
-    while upper >= lower:
-        half = lower + ((upper - lower) // 2)
-        if value == array[half]:
-            idx = half
-            break
-        elif value > array[half]:
-            lower = half + 1
-        else:
-            upper = half - 1
-    
-    if idx == -1: #Element not found, return where it should be
-        idx = lower
-
-    return idx
-
-cdef void average(double[:,::1] Theta_zh, double[:,::1] Psi_sz, \
-        double[:,::1] Psi_dz, int n) nogil:
+cdef void average(double[:,::1] Theta_zh, double[:,::1] Psi_sz, int n) nogil:
 
     cdef int nz = Theta_zh.shape[0]
     cdef int nh = Theta_zh.shape[1]
     cdef int ns = Psi_sz.shape[0]
-    cdef int nd = Psi_dz.shape[0]
     
     cdef int z = 0
     cdef int h = 0
     cdef int s = 0 
-    cdef int d = 0
     for z in xrange(nz):
         for h in xrange(nh):
             Theta_zh[z, h] /= n
 
         for s in xrange(ns):
             Psi_sz[s, z] /= n
-    
-        for d in xrange(nd):
-            Psi_dz[d, z] /= n
 
-def _average(Theta_zh, Psi_sz, Psi_dz, n):
+def _average(Theta_zh, Psi_sz, n):
     '''Wrapper used mostly for unit tests. Do not call directly otherwise'''
-    average(Theta_zh, Psi_sz, Psi_dz, n)
+    average(Theta_zh, Psi_sz, n)
 
 cdef void aggregate(int[:,::1] Count_zh, int[:,::1] Count_sz, \
-        int[:,::1] Count_dz, int[::1] count_h, int[::1] count_z, \
-        double alpha_zh, double beta_zs, double beta_zd, \
-        double[:,::1] Theta_zh, double[:,::1] Psi_sz, \
-        double[:,::1] Psi_dz) nogil:
+        int[::1] count_h, int[::1] count_z, double alpha_zh, double beta_zs, \
+        double[:,::1] Theta_zh, double[:,::1] Psi_sz) nogil:
     
     cdef int nz = Theta_zh.shape[0]
     cdef int nh = Theta_zh.shape[1]
     cdef int ns = Psi_sz.shape[0]
-    cdef int nd = Psi_dz.shape[0]
     
     cdef int z = 0
     cdef int h = 0
     cdef int s = 0 
-    cdef int d = 0
     for z in xrange(nz):
         for h in xrange(nh):
-            Theta_zh[z, h] += dir_posterior(Count_zh[z, h], \
-                    count_h[h], nz, alpha_zh) 
+            Theta_zh[z, h] += dir_posterior(Count_zh[z, h], count_h[h], nz, \
+                    alpha_zh) 
 
         for s in xrange(ns):
-            Psi_sz[s, z] += dir_posterior(Count_sz[s, z], \
-                    count_z[z], ns, beta_zs) 
+            Psi_sz[s, z] += dir_posterior(Count_sz[s, z], count_z[z], ns, \
+                    beta_zs) 
     
-        for d in xrange(nd):
-            Psi_dz[d, z] += dir_posterior(Count_dz[d, z], \
-                    count_z[z], nd, beta_zd)
-
-def _aggregate(Count_zh, Count_sz, Count_dz, count_h, count_z, \
-        alpha_zh, beta_zs, beta_zd, Theta_zh, Psi_sz, Psi_dz, ):
+def _aggregate(Count_zh, Count_sz, count_h, count_z, \
+        alpha_zh, beta_zs, Theta_zh, Psi_sz):
     '''Wrapper used mostly for unit tests. Do not call directly otherwise'''
-    aggregate(Count_zh, Count_sz, Count_dz, count_h, count_z, \
-        alpha_zh, beta_zs, beta_zd, Theta_zh, Psi_sz, Psi_dz)
+    aggregate(Count_zh, Count_sz, count_h, count_z, alpha_zh, beta_zs, \
+            Theta_zh, Psi_sz)
 
 cdef double dir_posterior(double joint_count, double global_count, \
         double num_occurences, double smooth) nogil:
@@ -123,98 +86,108 @@ def _dir_posterior(joint_count, global_count, num_occurences, smooth):
     '''Wrapper used mostly for unit tests. Do not call directly otherwise'''
     return dir_posterior(joint_count, global_count, num_occurences, smooth)
 
-cdef int sample(double tstamp, int hyper, int source, int dest, \
-        StampLists previous_stamps, \
-        int[:,::1] Count_zh, int[:,::1] Count_sz, int[:,::1] Count_dz, \
-        int[::1] count_h, int[::1] count_z, double alpha_zh, double beta_zs, \
-        double beta_zd, double[::1] prob_topics_aux, Kernel kernel) nogil:
+cdef int sample(int hyper, int obj, StampLists previous_stamps, \
+        int[:,::1] Count_zh, int[:,::1] Count_sz, int[::1] count_h, \
+        int[::1] count_z, double alpha_zh, double beta_zs, \
+        double[::1] prob_topics_aux, MarkovianMemory memory, \
+        Kernel kernel) nogil:
     
-    cdef int nz = prob_topics_aux.shape[0]
+    cdef int nz = Count_zh.shape[0]
     cdef int ns = Count_sz.shape[0]
-    cdef int nd = Count_dz.shape[0]
     cdef int z = 0
-    cdef int nstamps = 0
+    cdef Node *node = NULL
     
     for z in xrange(nz):
-        nstamps = previous_stamps.size(z)
-        prob_topics_aux[z] = kernel.pdf(tstamp, z, previous_stamps)
-        prob_topics_aux[z] = prob_topics_aux[z] * \
+        prob_topics_aux[z] = \
             dir_posterior(Count_zh[z, hyper], count_h[hyper], nz, alpha_zh) * \
-            dir_posterior(Count_sz[source, z], count_z[z], ns, beta_zs) * \
-            dir_posterior(Count_dz[dest, z], count_z[z], nd, beta_zd)
+            dir_posterior(Count_sz[obj, z], count_z[z], ns, beta_zs)
+            
+        node = memory.get_first(hyper)
+        while node != NULL:
+            prob_topics_aux[z] = prob_topics_aux[z] * \
+                dir_posterior(Count_sz[node.obj, z], count_z[z], ns, beta_zs) * \
+                kernel.pdf(node.dt, z, previous_stamps)
+            node = node.next_node
 
         #accumulate multinomial parameters
         if z >= 1:
             prob_topics_aux[z] += prob_topics_aux[z - 1]
-
+    
     cdef double u = rand() * prob_topics_aux[nz - 1]
     cdef int new_topic = bsp(&prob_topics_aux[0], u, nz)
     return new_topic
 
-def _sample(tstamp_idx, hyper, source, dest, previous_stamps, \
-        Count_zh, Count_sz, Count_dz, count_h, count_z, alpha_zh, beta_zs, \
-        beta_zd, prob_topics_aux, kernel):
+def _sample(hyper, obj, previous_stamps, Count_zh, Count_sz, \
+        count_h, count_z, alpha_zh, beta_zs, prob_topics_aux, memory, kernel):
     '''Wrapper used mostly for unit tests. Do not call directly otherwise'''
-    return sample(tstamp_idx, hyper, source, dest, previous_stamps, \
-            Count_zh, Count_sz, Count_dz, count_h, count_z, \
-            alpha_zh, beta_zs, beta_zd, prob_topics_aux, kernel)
+    return sample(hyper, obj, previous_stamps, Count_zh, \
+            Count_sz, count_h, count_z, alpha_zh, beta_zs, prob_topics_aux, \
+            memory, kernel)
 
-cdef void e_step(double[::1] tstamps, int[:,::1] Trace, \
-        StampLists previous_stamps, int[:,::1] Count_zh, \
-        int[:,::1] Count_sz, int[:,::1] Count_dz, int[::1] count_h, \
-        int[::1] count_z, double alpha_zh, double beta_zs, \
-        double beta_zd, double[::1] prob_topics_aux, Kernel kernel) nogil:
+cdef void e_step(double[::1] dts, int[:,::1] Trace, \
+        StampLists previous_stamps, int[:,::1] Count_zh, int[:,::1] Count_sz, \
+        int[::1] count_h, int[::1] count_z, double alpha_zh, double beta_zs, \
+        double[::1] prob_topics_aux, int mem_size, MarkovianMemory memory, \
+        Kernel kernel) nogil:
     
-    cdef double tstamp     
-    cdef int hyper, source, dest, old_topic
+    cdef double dt    
+    cdef int hyper, obj, old_topic
     cdef int new_topic
-    cdef int i
-
+    cdef int i, j
+    cdef Node *node = NULL
+    
+    memory.clear()
     for i in xrange(Trace.shape[0]):
-        tstamp = tstamps[i]
+        dt = dts[i]
         hyper = Trace[i, 0]
-        source = Trace[i, 1]
-        dest = Trace[i, 2]
-        old_topic = Trace[i, 3]
+        obj = Trace[i, 1]
+        old_topic = Trace[i, 2]
 
         Count_zh[old_topic, hyper] -= 1
-        Count_sz[source, old_topic] -= 1
-        Count_dz[dest, old_topic] -= 1
+        Count_sz[obj, old_topic] -= 1
+        #node = memory.get_first(hyper)
+        #while node != NULL:
+        #    Count_sz[node.obj, old_topic] -= 1
+        #    node = node.next_node
         count_h[hyper] -= 1
         count_z[old_topic] -= 1
 
-        new_topic = sample(tstamp, hyper, source, dest, \
-                previous_stamps, \
-                Count_zh, Count_sz, Count_dz, count_h, count_z, \
-                alpha_zh, beta_zs, beta_zd, \
-                prob_topics_aux, kernel)
+        new_topic = sample(hyper, obj, previous_stamps, Count_zh, \
+                Count_sz, count_h, count_z, alpha_zh, beta_zs, \
+                prob_topics_aux, memory, kernel)
+        Trace[i, 2] = new_topic
         
-        Trace[i, 3] = new_topic
         Count_zh[new_topic, hyper] += 1
-        Count_sz[source, new_topic] += 1
-        Count_dz[dest, new_topic] += 1
+        Count_sz[obj, new_topic] += 1
+        #node = memory.get_first(hyper)
+        #while node != NULL:
+        #    Count_sz[node.obj, new_topic] += 1
+        #    node = node.next_node
         count_h[hyper] += 1
         count_z[new_topic] += 1
+        
+        memory.append_last(hyper, obj, dt)
+        if memory.size(hyper) > mem_size:
+            memory.remove_first(hyper)
 
-def _e_step(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
-        Count_dz, count_h, count_z, alpha_zh, beta_zs, beta_zd, \
-        prob_topics_aux, kernel):
+def _e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
+        count_z, alpha_zh, beta_zs, prob_topics_aux, mem_size, mem, kernel):
     '''Wrapper used mostly for unit tests. Do not call directly otherwise'''
-    e_step(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
-            Count_dz, count_h, count_z, alpha_zh, beta_zs, beta_zd, \
-            prob_topics_aux, kernel)
+    e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
+            count_z, alpha_zh, beta_zs, prob_topics_aux, mem_size, mem, \
+            kernel)
 
-cdef void m_step(double[::1] tstamps, int[:,::1] Trace, \
+cdef void m_step(double[::1] dts, int[:,::1] Trace, \
         StampLists previous_stamps, Kernel kernel) nogil:
     
     previous_stamps.clear()
     cdef int topic
-    cdef double tstamp
+    cdef double dt
     cdef int i
     for i in xrange(Trace.shape[0]):
-        tstamp = tstamps[i]
-        topic = Trace[i, 3]
-        previous_stamps.append(topic, tstamp)
+        dt = dts[i]
+        topic = Trace[i, 2]
+        previous_stamps.append(topic, dt)
     kernel.mstep(previous_stamps)
 
 cdef void col_normalize(double[:,::1] X) nogil:
@@ -233,136 +206,145 @@ cdef void col_normalize(double[:,::1] X) nogil:
             else:
                 X[i, j] = 1.0 / X.shape[0]
 
-cdef void fast_em(double[::1] tstamps, int[:,::1] Trace, \
+cdef void fast_em(double[::1] dts, int[:,::1] Trace, \
         StampLists previous_stamps, int[:,::1] Count_zh, int[:,::1] Count_sz, \
-        int[:,::1] Count_dz, int[::1] count_h, int[::1] count_z, double alpha_zh, \
-        double beta_zs, double beta_zd, \
+        int[::1] count_h, int[::1] count_z, double alpha_zh, double beta_zs, \
         double[::1] prob_topics_aux, double[:,::1] Theta_zh, \
-        double[:,::1] Psi_sz, double[:,::1] Psi_dz, int num_iter, \
-        int burn_in, Kernel kernel) nogil:
+        double[:,::1] Psi_sz, int num_iter, int burn_in, int mem_size, \
+        MarkovianMemory memory, Kernel kernel) nogil:
 
     cdef int useful_iters = 0
     cdef int i
     for i in xrange(num_iter):
-        e_step(tstamps, Trace, previous_stamps, \
-                Count_zh, Count_sz, Count_dz, count_h, count_z, \
-                alpha_zh, beta_zs, beta_zd, \
-                prob_topics_aux, kernel)
-        m_step(tstamps, Trace, previous_stamps, kernel)
+        e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
+                count_z, alpha_zh, beta_zs, prob_topics_aux, mem_size, \
+                memory, kernel)
+        m_step(dts, Trace, previous_stamps, kernel)
         
         #average everything out after burn_in
         if i >= burn_in:
-            aggregate(Count_zh, Count_sz, Count_dz, \
-                    count_h, count_z, alpha_zh, beta_zs, beta_zd, \
-                    Theta_zh, Psi_sz, Psi_dz)
+            aggregate(Count_zh, Count_sz, \
+                    count_h, count_z, alpha_zh, beta_zs, \
+                    Theta_zh, Psi_sz)
             useful_iters += 1
 
-    average(Theta_zh, Psi_sz, Psi_dz, useful_iters)
+    average(Theta_zh, Psi_sz, useful_iters)
     col_normalize(Theta_zh)
     col_normalize(Psi_sz)
-    col_normalize(Psi_dz)
 
-def em(tstamps, Trace, previous_stamps, Count_zh, Count_sz, Count_dz, \
-        count_h, count_z, alpha_zh, beta_zs, beta_zd, \
-        prob_topics_aux, \
-        Theta_zh, Psi_sz, Psi_dz, num_iter, burn_in, kernel):
+def em(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, count_z, \
+        alpha_zh, beta_zs, prob_topics_aux, Theta_zh, Psi_sz, num_iter, \
+        burn_in, mem_size, kernel):
     
-    fast_em(tstamps, Trace, previous_stamps, Count_zh, Count_sz, Count_dz, \
-            count_h, count_z, alpha_zh, beta_zs, beta_zd, \
-            prob_topics_aux, \
-            Theta_zh, Psi_sz, Psi_dz, num_iter, burn_in, kernel)
+    cdef MarkovianMemory memory = MarkovianMemory(Count_zh.shape[1])
+    fast_em(dts, Trace, previous_stamps, Count_zh, Count_sz, \
+            count_h, count_z, alpha_zh, beta_zs, prob_topics_aux, \
+            Theta_zh, Psi_sz, num_iter, burn_in, mem_size, memory, \
+            kernel)
 
 def fast_populate(int[:,::1] Trace, int[:,::1] Count_zh, int[:,::1] Count_sz, \
-        int[:,::1] Count_dz, int[::1] count_h, int[::1] count_z):
+        int[::1] count_h, int[::1] count_z):
     
-    cdef int i, h, s, d, z
+    cdef int i, h, s, z
     for i in xrange(Trace.shape[0]):
         h = Trace[i, 0]
         s = Trace[i, 1]
-        d = Trace[i, 2]
-        z = Trace[i, 3]
+        z = Trace[i, 2]
 
         Count_zh[z, h] += 1
         Count_sz[s, z] += 1
-        Count_dz[d, z] += 1
         count_h[h] += 1
         count_z[z] += 1
 
-def quality_estimate(double[::1] tstamps, int[:,::1] Trace, \
+def quality_estimate(double[::1] dts, int[:,::1] Trace, \
         StampLists previous_stamps, int[:,::1] Count_zh, int[:,::1] Count_sz, \
-        int[:,::1] Count_dz, int[::1] count_h, int[::1] count_z, \
-        double alpha_zh, double beta_zs, double beta_zd, \
-        double[::1] ll_per_z, int[::1] idx, Kernel kernel):
+        int[::1] count_h, int[::1] count_z, \
+        double alpha_zh, double beta_zs, \
+        double[::1] ll_per_z, int[::1] idx, int mem_size, Kernel kernel):
 
+    cdef MarkovianMemory memory = MarkovianMemory(Count_zh.shape[1])
+    cdef Node *node = NULL
     cdef int nz = Count_zh.shape[0]
     cdef int ns = Count_sz.shape[0]
-    cdef int nd = Count_dz.shape[0]
     
     cdef int i = 0
-    cdef int h, z, s, d = 0
-    cdef double tstamp = 0
+    cdef int h, z, s = 0
+    cdef double dt = 0
 
-    for i in range(idx.shape[0]):
-        tstamp = tstamps[idx[i]]
+    for i in xrange(idx.shape[0]):
+        dt = dts[idx[i]] 
         h = Trace[idx[i], 0]
         s = Trace[idx[i], 1]
-        d = Trace[idx[i], 2]
-        z = Trace[idx[i], 3]
+        z = Trace[idx[i], 2]
 
-        ll_per_z[z] += log(kernel.pdf(tstamp, z, previous_stamps)) + \
-            log(dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
-            log(dir_posterior(Count_sz[s, z], count_z[z], ns, beta_zs)) + \
-            log(dir_posterior(Count_dz[d, z], count_z[z], nd, beta_zd))
+        ll_per_z[z] += \
+                log(dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
+                log(dir_posterior(Count_sz[s, z], count_z[z], ns, beta_zs))
 
-def mean_reciprocal_rank(double[::1] tstamps, int[:, ::1] HSDs, \
+        node = memory.get_first(h)
+        while node != NULL:
+            ll_per_z[z] += \
+                    log(kernel.pdf(node.dt, z, previous_stamps)) + \
+                    log(dir_posterior(Count_sz[node.obj, z], count_z[z], ns, 
+                        beta_zs))
+            node = node.next_node
+        
+        memory.append_last(h, s, dt)
+        if memory.size(h) > mem_size:
+            memory.remove_first(h)
+
+def reciprocal_rank(double[::1] tstamps, int[:, ::1] HOs, MarkovianMemory memory, \
         StampLists previous_stamps, double[:, ::1] Theta_zh, \
-        double[:, ::1] Psi_sz, double[:, ::1] Psi_dz, int[::1] count_z, \
-        Kernel kernel):
+        double[:, ::1] Psi_sz, int[::1] count_z, Kernel kernel):
         
     cdef double dt = 0
     cdef int h = 0
     cdef int s = 0
-    cdef int real_d = 0
-    cdef int candidate_d = 0
+    cdef int real_o = 0
+    cdef int candidate_o = 0
 
     cdef int z = 0
 
-    cdef double[::1] aux_base = np.zeros(Psi_dz.shape[0], dtype='d')
-    cdef double[::1] aux_delta = np.zeros(Psi_dz.shape[0], dtype='d')
-    cdef double[::1] aux_full = np.zeros(Psi_dz.shape[0], dtype='d')
+    cdef double[::1] aux_base = np.zeros(Psi_sz.shape[0], dtype='d')
+    cdef double[::1] aux_delta = np.zeros(Psi_sz.shape[0], dtype='d')
+    cdef double[::1] aux_full = np.zeros(Psi_sz.shape[0], dtype='d')
     
-    cdef double[:, ::1] rrs = np.zeros(shape=(HSDs.shape[0], 3), dtype='d')
-    cdef int i = 0
-    for i in xrange(HSDs.shape[0]):
-        dt = tstamps[i]
-        h = HSDs[i, 0]
-        s = HSDs[i, 1]
-        real_d = HSDs[i, 2]
-        
-        for candidate_d in prange(Psi_dz.shape[0], schedule='static', nogil=True):
-            aux_base[candidate_d] = 0.0
-            aux_delta[candidate_d] = 0.0
-            aux_full[candidate_d] = 0.0
+    #cdef int m = mem_size
+    #cdef MarkovianMemory memory = MarkovianMemory()
+    #for i in xrange(mem_size):
+    #    memory.append_last(Trace[i, 1])
 
-        for z in xrange(Psi_dz.shape[1]):
-            for candidate_d in prange(Psi_dz.shape[0], schedule='static', nogil=True):
-                aux_base[candidate_d] += count_z[z] * Psi_sz[s, z] * \
-                        Psi_dz[candidate_d, z] 
-                aux_delta[candidate_d] += count_z[z] * Psi_sz[s, z] * \
-                        Psi_dz[candidate_d, z] * \
+    cdef double[:, ::1] rrs = np.zeros(shape=(HOs.shape[0], 3), dtype='d')
+    cdef int i = 0
+    for i in xrange(HOs.shape[0]):
+        dt = tstamps[i + 1] - tstamps[i]
+        h = HOs[i, 0]
+        real_o = HOs[i, 1]
+        
+        for candidate_o in prange(Psi_sz.shape[0], schedule='static', nogil=True):
+            aux_base[candidate_o] = 0.0
+            aux_delta[candidate_o] = 0.0
+            aux_full[candidate_o] = 0.0
+
+        for z in xrange(Psi_sz.shape[1]):
+            for candidate_o in prange(Psi_sz.shape[0], schedule='static', nogil=True):
+                aux_base[candidate_o] += count_z[z] * Psi_sz[s, z] * \
+                        Psi_sz[candidate_o, z] 
+                aux_delta[candidate_o] += count_z[z] * Psi_sz[s, z] * \
+                        Psi_sz[candidate_o, z] * \
                         kernel.pdf(dt, z, previous_stamps)
-                aux_full[candidate_d] += Psi_sz[s, z] * \
-                        Psi_dz[candidate_d, z] * Theta_zh[z, h] * \
+                aux_full[candidate_o] += Psi_sz[s, z] * \
+                        Psi_sz[candidate_o, z] * Theta_zh[z, h] * \
                         kernel.pdf(dt, z, previous_stamps)
         
-        for candidate_d in prange(Psi_dz.shape[0], schedule='static', nogil=True):
-            if aux_base[candidate_d] >= aux_base[real_d]:
+        for candidate_o in prange(Psi_sz.shape[0], schedule='static', nogil=True):
+            if aux_base[candidate_o] >= aux_base[real_o]:
                 rrs[i, 0] += 1
 
-            if aux_delta[candidate_d] >= aux_delta[real_d]:
+            if aux_delta[candidate_o] >= aux_delta[real_o]:
                 rrs[i, 1] += 1
 
-            if aux_full[candidate_d] >= aux_full[real_d]:
+            if aux_full[candidate_o] >= aux_full[real_o]:
                 rrs[i, 2] += 1
         
         rrs[i, 0] = 1.0 / rrs[i, 0]

@@ -12,17 +12,15 @@ from numpy.testing import assert_array_equal
 from node_sherlock import dataio
 
 def test_initialize():
-    tstamps, Trace, previous_stamps, Count_zh, Count_sz, Count_dz, \
-            count_h, count_z, prob_topics_aux, Theta_zh, Psi_sz, \
-            Psi_dz, hyper2id, source2id, dest2id = \
+    tstamps, Trace, previous_stamps, Count_zh, Count_oz, count_h, count_z, \
+            prob_topics_aux, Theta_zh, Psi_oz, hyper2id, obj2id = \
             dataio.initialize_trace(files.SIZE10, 2, 10)
     
     assert_equal(len(hyper2id), 3)
-    assert_equal(len(source2id), 5) 
-    assert_equal(len(dest2id), 6)
+    assert_equal(len(obj2id), 6) 
     
     assert_equal(Trace.shape[0], 10)
-    assert_equal(Trace.shape[1], 4)
+    assert_equal(Trace.shape[1], 3)
     
     for z in [0, 1]:
         assert previous_stamps._size(z) > 0
@@ -35,12 +33,10 @@ def test_initialize():
     
     #We can only test shapes and sum, since assignments are random
     assert_equal(Count_zh.shape, (2, 3))
-    assert_equal(Count_sz.shape, (5, 2))
-    assert_equal(Count_dz.shape, (6, 2))
+    assert_equal(Count_oz.shape, (6, 2))
     
     assert_equal(Count_zh.sum(), 10)
-    assert_equal(Count_sz.sum(), 10)
-    assert_equal(Count_dz.sum(), 10)
+    assert_equal(Count_oz.sum(), 10)
     
     assert (prob_topics_aux == 0).all()
 
@@ -52,11 +48,9 @@ def test_initialize():
         assert topic in [0, 1]
         assert c[topic] == count_z[topic]
 
-
 def test_initialize_limits():
-    tstamps, Trace, previous_stamps, Count_zh, Count_sz, Count_dz, \
-            count_h, count_z, prob_topics_aux, Theta_zh, Psi_sz, \
-            Psi_dz, hyper2id, source2id, dest2id = \
+    tstamps, Trace, previous_stamps, Count_zh, Count_oz, count_h, count_z, \
+            prob_topics_aux, Theta_zh, Psi_oz, hyper2id, obj2id = \
             dataio.initialize_trace(files.SIZE10, 2, 10, 2, 5)
     
     assert len(tstamps) == 3

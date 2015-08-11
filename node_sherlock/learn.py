@@ -9,11 +9,11 @@ from collections import OrderedDict
 import numpy as np
 import os
 
-def prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, \
+def prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
         kernel, residency_priors, num_iter, burn_in, tstamps, Trace, \
-        Count_zh, Count_sz, Count_dz, count_h, count_z, \
-        prob_topics_aux, Theta_zh, Psi_sz, Psi_dz, hyper2id, source2id, \
-        dest2id, from_, to):
+        Count_zh, Count_sz, count_h, count_z, \
+        prob_topics_aux, Theta_zh, Psi_sz, hyper2id, source2id, \
+        from_, to):
     
     rv = OrderedDict()
     
@@ -22,7 +22,6 @@ def prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, \
     
     rv['alpha_zh'] = np.asarray([alpha_zh])
     rv['beta_zs'] = np.asarray([beta_zs])
-    rv['beta_zd'] = np.asarray([beta_zd])
     
     rv['num_iter'] = np.asarray([num_iter])
     rv['burn_in'] = np.asarray([burn_in])
@@ -33,13 +32,11 @@ def prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, \
     rv['tstamps'] = tstamps
     rv['Count_zh'] = Count_zh
     rv['Count_sz'] = Count_sz
-    rv['Count_dz'] = Count_dz
     rv['count_h'] = count_h
     rv['count_z'] = count_z
     
     rv['Theta_zh'] = Theta_zh
     rv['Psi_sz'] = Psi_sz
-    rv['Psi_dz'] = Psi_dz
     
     #TODO: very ugly sollution to save class name.
     kname = str(kernel.__class__).split("'")[1]
@@ -50,10 +47,9 @@ def prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, \
     rv['assign'] = Trace[:, -1]
     rv['hyper2id'] = hyper2id
     rv['source2id'] = source2id
-    rv['dest2id'] = dest2id    
     return rv 
 
-def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
+def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
         residency_priors, num_iter, burn_in, from_=0, to=np.inf):
     '''
     Learns the latent topics from a temporal hypergraph trace. 
@@ -78,9 +74,6 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
     beta_zs : float
         The value of the beta_zs (beta) hyperaparameter
 
-    beta_zd : float
-        The value of the beta_zd (beta') hyperparameter
-
     kernel : Kernel object
         The kernel to use
 
@@ -99,21 +92,21 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, kernel, \
     TODO: explain this better. For the time being, see the keys of the dict.
     A dictionary with the results.
     '''
-    tstamps, Trace, previous_stamps, Count_zh, Count_sz, Count_dz, \
+    tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, prob_topics_aux, Theta_zh, Psi_sz, \
-            Psi_dz, hyper2id, source2id, dest2id = \
+            hyper2id, source2id = \
             dataio.initialize_trace(trace_fpath, num_topics, num_iter, \
             from_, to)
     
     em(tstamps, Trace, previous_stamps, Count_zh, \
-            Count_sz, Count_dz, count_h, count_z, alpha_zh, beta_zs, beta_zd, \
-            prob_topics_aux, Theta_zh, Psi_sz, Psi_dz, num_iter, \
-            burn_in, kernel)
+            Count_sz, count_h, count_z, alpha_zh, beta_zs, \
+            prob_topics_aux, Theta_zh, Psi_sz, num_iter, \
+            burn_in, 1.0, kernel)
     
-    rv = prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, beta_zd, \
+    rv = prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
             kernel, residency_priors, num_iter, burn_in, tstamps, Trace, \
-            Count_zh, Count_sz, Count_dz, count_h, \
-            count_z, prob_topics_aux, Theta_zh, Psi_sz, Psi_dz, hyper2id, \
-            source2id, dest2id, from_, to)
+            Count_zh, Count_sz, count_h, \
+            count_z, prob_topics_aux, Theta_zh, Psi_sz, hyper2id, \
+            source2id, from_, to)
     rv['algorithm'] = np.asarray(['serial gibbs + em'])
     return rv

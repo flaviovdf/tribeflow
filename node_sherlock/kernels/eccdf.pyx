@@ -7,37 +7,14 @@
 
 from __future__ import print_function, division
 
-from node_sherlock._stamp_lists cimport StampLists
+from node_sherlock.mycollections.stamp_lists cimport StampLists
+
 from node_sherlock.kernels.base cimport Kernel
 
+from node_sherlock.sorting.binsearch cimport bsp
+from node_sherlock.sorting.introsort cimport sort
+
 import numpy as np
-
-cdef int bsp(double *array, double value, int n) nogil:
-    '''
-    Finds the first element in the array where the given is OR should have been
-    in the given array. This is simply a binary search, but if the element is
-    not found we return the index where it should have been at.
-    '''
-
-    cdef int lower = 0
-    cdef int upper = n - 1 #closed interval
-    cdef int half = 0
-    cdef int idx = -1 
- 
-    while upper >= lower:
-        half = lower + ((upper - lower) // 2)
-        if value == array[half]:
-            idx = half
-            break
-        elif value > array[half]:
-            lower = half + 1
-        else:
-            upper = half - 1
-    
-    if idx == -1: #Element not found, return where it should be
-        idx = lower
-
-    return idx
 
 cdef class ECCDFKernel(Kernel):
 
@@ -64,8 +41,18 @@ cdef class ECCDFKernel(Kernel):
         cdef int loc = bsp(stamps.get_all(z), x, n)
         return (a + n - loc) / (a + b + n)
     
+    def _pdf(self, double x, int z, StampLists stamps):
+        return self.pdf(x, z, stamps)
+
     cdef void mstep(self, StampLists stamps) nogil:
-        pass
+        cdef int z = 0
+        cdef int n = 0
+        for z in xrange(self.P.shape[0]):
+            n = stamps.size(z)
+            sort(stamps.get_all(z), n)
+    
+    def _mstep(self, StampLists stamps):
+        self.mstep(stamps)
 
     def get_priors(self):
         return np.array(self.priors)
