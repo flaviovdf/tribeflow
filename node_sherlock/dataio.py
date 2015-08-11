@@ -45,17 +45,21 @@ def initialize_trace(trace_fpath, num_topics, num_iter, \
             if i < from_ or i >= to:
                 continue
             
-            dt, hyper_str, obj_str = line.strip().split('\t')
+            dt, hyper_str, source_str, dest_str = line.strip().split('\t')
             dt = float(dt)
 
             if hyper_str not in hyper2id:
                 hyper2id[hyper_str] = len(hyper2id)
             
-            if obj_str not in obj2id:
-                obj2id[obj_str] = len(obj2id)
+            if source_str not in obj2id:
+                obj2id[source_str] = len(obj2id)
+            
+            if dest_str not in obj2id:
+                obj2id[dest_str] = len(obj2id)
             
             h = hyper2id[hyper_str]
-            o = obj2id[obj_str]
+            s = obj2id[source_str]
+            d = obj2id[dest_str]
             
             if not initial_assign:
                 z = np.random.randint(num_topics)
@@ -63,18 +67,25 @@ def initialize_trace(trace_fpath, num_topics, num_iter, \
                 z = initial_assign[i]
 
             count_zh_dict[z, h] += 1
-            count_oz_dict[o, z] += 1
-            count_z_dict[z] += 1
+            count_oz_dict[s, z] += 1
+            count_oz_dict[d, z] += 1
+            count_z_dict[z] += 2 #Two because 1 for source 1 for dest.
             count_h_dict[h] += 1
             
             topic_stamps_dict[z].append(i)
             dts.append(dt)
-            Trace.append([h, o, z])
+            Trace.append([h, s, d, z])
     
+    #Sort by the residency time. 
+    dts = np.asarray(dts)
+    argsort = dts.argsort()
+    dts = dts[argsort]
+
     #Create contiguous arrays, not needed but adds a small speedup
     dts = np.asanyarray(dts, order='C')
-    Trace = np.asarray(Trace, dtype='i4', order='C')
-    
+    Trace = np.asarray(Trace)
+    Trace = np.asanyarray(Trace[argsort], dtype='i4', order='C')
+
     nh = len(hyper2id)
     no = len(obj2id)
     nz = num_topics

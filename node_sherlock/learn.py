@@ -101,7 +101,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
     em(tstamps, Trace, previous_stamps, Count_zh, \
             Count_sz, count_h, count_z, alpha_zh, beta_zs, \
             prob_topics_aux, Theta_zh, Psi_sz, num_iter, \
-            burn_in, 1.0, kernel)
+            burn_in, kernel)
     
     rv = prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
             kernel, residency_priors, num_iter, burn_in, tstamps, Trace, \

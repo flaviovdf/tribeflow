@@ -26,7 +26,7 @@ def test_correlate_all():
             dataio.initialize_trace(files.SIZE10, 2, 10)
  
     C = dynamic.correlate_counts(Count_zh, Count_sz, count_h, count_z, .1, \
-            .1, .1)
+            .1)
 
     assert_equal((2, 2), C.shape)
     assert C[0, 1] != 0
@@ -49,7 +49,7 @@ def test_merge():
                 count_z, alpha_zh, beta_zd, ll_per_z, \
                 np.arange(Trace.shape[0], dtype='i4'), kernel)
     
-    Trace_new, Count_zh_new, Count_sz_new, Count_dz_new, \
+    Trace_new, Count_zh_new, Count_sz_new, \
             count_z_new, new_stamps, _ = \
             dynamic.merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, alpha_zh, beta_zs, ll_per_z, kernel)
@@ -113,9 +113,9 @@ def test_split():
 
     assert Count_sz_new.shape[0] == Count_sz.shape[0]
     assert Count_sz_new.shape[1] > Count_sz.shape[1]
-    assert Count_sz_new[:, 0].sum() == 5
-    assert Count_sz_new[:, 1].sum() == 5
+    assert Count_sz_new[:, 0].sum() == 10
+    assert Count_sz_new[:, 1].sum() == 10
 
     assert count_z_new.shape[0] > count_z.shape[0]
-    assert count_z_new[0] == 5
-    assert count_z_new[1] == 5
+    assert count_z_new[0] == 10
+    assert count_z_new[1] == 10

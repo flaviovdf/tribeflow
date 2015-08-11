@@ -25,13 +25,13 @@ def test_full_learn_null():
     Count_sz = rv['Count_sz'] 
     
     assert_equal(Count_zh.sum(), 1000)
-    assert_equal(Count_sz.sum(), 1000) 
+    assert_equal(Count_sz.sum(), 2000) 
     
     count_h = rv['count_h']
     count_z = rv['count_z']
 
     assert_equal(count_h.sum(), 1000)
-    assert_equal(count_z.sum(), 1000)
+    assert_equal(count_z.sum(), 2000)
 
     assert rv['assign'].shape == (1000, )
 

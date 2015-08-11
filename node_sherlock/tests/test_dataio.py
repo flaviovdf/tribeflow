@@ -20,7 +20,7 @@ def test_initialize():
     assert_equal(len(obj2id), 6) 
     
     assert_equal(Trace.shape[0], 10)
-    assert_equal(Trace.shape[1], 3)
+    assert_equal(Trace.shape[1], 4)
     
     for z in [0, 1]:
         assert previous_stamps._size(z) > 0
@@ -29,14 +29,14 @@ def test_initialize():
     assert_equal(count_h[1], 4)
     assert_equal(count_h[2], 2)
     
-    assert_equal(count_z.sum(), 10)
+    assert_equal(count_z.sum(), 20) #depends on memory
     
     #We can only test shapes and sum, since assignments are random
     assert_equal(Count_zh.shape, (2, 3))
     assert_equal(Count_oz.shape, (6, 2))
     
     assert_equal(Count_zh.sum(), 10)
-    assert_equal(Count_oz.sum(), 10)
+    assert_equal(Count_oz.sum(), 20)
     
     assert (prob_topics_aux == 0).all()
 
@@ -46,7 +46,7 @@ def test_initialize():
     c = Counter(Trace[:, -1])
     for topic in c:
         assert topic in [0, 1]
-        assert c[topic] == count_z[topic]
+        assert c[topic] == count_z[topic] / 2
 
 def test_initialize_limits():
     tstamps, Trace, previous_stamps, Count_zh, Count_oz, count_h, count_z, \

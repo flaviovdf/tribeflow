@@ -29,7 +29,8 @@ def test_sample():
     tstamp_idx = 3
     hyper = Trace[tstamp_idx, 0]
     source = Trace[tstamp_idx, 1]
-    old_topic = Trace[tstamp_idx, 2]
+    dest = Trace[tstamp_idx, 2]
+    old_topic = Trace[tstamp_idx, 3]
 
     new_topic = _learn._sample(tstamp_idx, hyper, source, dest, \
             previous_stamps, Count_zh, Count_sz, count_h, \
@@ -38,7 +39,6 @@ def test_sample():
     assert new_topic <= 3
 
 def test_estep():
-    return
     tstamps, Trace, previous_stamps, Count_zh, Count_sz, count_h, count_z, \
             prob_topics_aux, Theta_zh, Psi_sz, hyper2id, source2id = \
             dataio.initialize_trace(files.SIZE10, 2, 10)
@@ -49,13 +49,12 @@ def test_estep():
     beta_zs = .1
 
     assert_equal(Count_zh.sum(), 10)
-    assert_equal(Count_sz.sum(), 10)
+    assert_equal(Count_sz.sum(), 20)
     
     assert_equal(count_h[0], 4)
     assert_equal(count_h[1], 4)
     assert_equal(count_h[2], 2)
     
-    print(Count_zh)
     new_state = _learn._e_step(tstamps, Trace, previous_stamps, Count_zh, \
             Count_sz, count_h, count_z, alpha_zh, beta_zs, prob_topics_aux, \
             kernel)
@@ -64,9 +63,8 @@ def test_estep():
     assert_equal(count_h[1], 4)
     assert_equal(count_h[2], 2)
     
-    print(Count_zh)
     assert_equal(Count_zh.sum(), 10)
-    assert_equal(Count_sz.sum(), 10)
+    assert_equal(Count_sz.sum(), 20)
 
 def test_em():
     
@@ -75,17 +73,6 @@ def test_em():
             dataio.initialize_trace(files.SIZE10, 2, 10)
     kernel = NoopKernel()
     kernel.build(Trace.shape[0], Count_zh.shape[1], np.zeros(0, dtype='d'))
-    
-    print('aaa')
-    print('aaa')
-    print('aaa')
-    print('aaa')
-    print('aaa')
-    print('aaa')
-    print(prob_topics_aux)
-    print(Count_zh)
-    print(Count_sz)
-    print(Trace)
     
     alpha_zh = .1
     beta_zs = .1
@@ -100,7 +87,7 @@ def test_em():
 
     _learn.em(tstamps, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
             count_z, alpha_zh, beta_zs, prob_topics_aux, Theta_zh, Psi_sz, \
-            10, 2, 1, kernel)
+            10, 2, kernel)
     
     assert (Theta_zh > 0).sum() > 0
     assert (Psi_sz > 0).sum() > 0
