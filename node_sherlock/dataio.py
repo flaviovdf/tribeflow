@@ -18,7 +18,7 @@ def save_model(out_fpath, model):
             store[model_key] = pd.DataFrame(model_val)
         else:
             store[model_key] = pd.DataFrame(model_val.items(), \
-                    columno=['Name', 'Id'])
+                    columns=['Name', 'Id'])
     store.close()
 
 def initialize_trace(trace_fpath, num_topics, num_iter, \

@@ -5,14 +5,14 @@ def main(model, test_file):
     store = pd.HDFStore(model)
 
     Psi_sz = store['Psi_sz'].values
-    Psi_dz = store['Psi_dz'].values
+    Psi_dz = store['Psi_sz'].values
     count_z = store['count_z'].values[:, 0]
 
     T_ds = Psi_dz.dot((Psi_sz * count_z).T) 
     T_ds = T_ds / T_ds.sum(axis=0)
     
     source2id = dict(store['source2id'].values)
-    dest2id = dict(store['dest2id'].values)
+    dest2id = source2id #dict(store['dest2id'].values)
     
     N_ds = np.zeros_like(T_ds)
     count = {}
