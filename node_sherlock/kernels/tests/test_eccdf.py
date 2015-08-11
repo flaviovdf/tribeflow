@@ -19,7 +19,7 @@ def test_all():
             slists._append(i, e)
             E[i].append(e)
 
-    kern = ECCDFKernel()
+    kern = ECCDFKernel(True)
     kern.build(800, 4, np.array([1.0, 3.0]))
 
     kern._mstep(slists)

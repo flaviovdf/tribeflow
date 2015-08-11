@@ -20,6 +20,10 @@ cdef class ECCDFKernel(Kernel):
 
     cdef double[:, ::1] P
     cdef double[::1] priors
+    cdef int sort_on_mstep
+
+    def __init__(self, sort_on_mstep=False):
+        self.sort_on_mstep = int(sort_on_mstep)
 
     def build(self, int trace_size, int nz, double[::1] priors):
         
@@ -45,6 +49,9 @@ cdef class ECCDFKernel(Kernel):
         return self.pdf(x, z, stamps)
 
     cdef void mstep(self, StampLists stamps) nogil:
+        if self.sort_on_mstep == 0:
+            return
+        
         cdef int z = 0
         cdef int n = 0
         for z in xrange(self.P.shape[0]):
