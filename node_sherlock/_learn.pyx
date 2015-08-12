@@ -190,7 +190,6 @@ cdef void fast_em(double[::1] dts, int[:,::1] Trace, \
         double[::1] prob_topics_aux, double[:,::1] Theta_zh, \
         double[:,::1] Psi_sz, int num_iter, int burn_in, Kernel kernel) nogil:
 
-    cdef int useful_iters = 0
     cdef int i
     for i in xrange(num_iter):
         e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
@@ -202,19 +201,19 @@ cdef void fast_em(double[::1] dts, int[:,::1] Trace, \
             aggregate(Count_zh, Count_sz, \
                     count_h, count_z, alpha_zh, beta_zs, \
                     Theta_zh, Psi_sz)
-            useful_iters += 1
-
-    average(Theta_zh, Psi_sz, useful_iters)
-    col_normalize(Theta_zh)
-    col_normalize(Psi_sz)
 
 def em(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, count_z, \
         alpha_zh, beta_zs, prob_topics_aux, Theta_zh, Psi_sz, num_iter, \
-        burn_in, kernel):
+        burn_in, kernel, average_and_normalize=True):
     
     fast_em(dts, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, alpha_zh, beta_zs, prob_topics_aux, \
             Theta_zh, Psi_sz, num_iter, burn_in, kernel)
+    if average_and_normalize:
+        if (num_iter - burn_in) > 0:
+            average(Theta_zh, Psi_sz, num_iter - burn_in)
+        col_normalize(Theta_zh)
+        col_normalize(Psi_sz)
 
 def fast_populate(int[:,::1] Trace, int[:,::1] Count_zh, int[:,::1] Count_sz, \
         int[::1] count_h, int[::1] count_z):

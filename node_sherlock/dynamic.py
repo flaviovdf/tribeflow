@@ -367,7 +367,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
             _learn.em(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
                     count_h, count_z, alpha_zh, beta_zs, \
                     prob_topics_aux, Theta_zh, Psi_sz, num_iter, \
-                    num_iter * 2, kernel)
+                    num_iter * 2, kernel, False)
         
         print('Split')
         ll_per_z = np.zeros(count_z.shape[0], dtype='f8')

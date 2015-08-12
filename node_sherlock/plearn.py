@@ -130,7 +130,7 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, \
         
         em(tstamps, Trace, stamps, Count_zh, Count_sz_sum, \
                 count_h, count_z, alpha_zh, beta_zs, aux, Theta_zh, \
-                Psi_sz, CACHE_SIZE, CACHE_SIZE * 2, kernel)
+                Psi_sz, CACHE_SIZE, CACHE_SIZE * 2, kernel, False)
 
         #Update local counts
         Count_sz_local[:] = Count_sz_sum - Count_sz_others
