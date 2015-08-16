@@ -99,7 +99,7 @@ cdef int sample(double dt, int hyper, int source, int dest, \
             dir_posterior(Count_zh[z, hyper], count_h[hyper], nz, alpha_zh) * \
             dir_posterior(Count_sz[source, z], count_z[z], ns, beta_zs) * \
             dir_posterior(Count_sz[dest, z], count_z[z], ns, beta_zs)
-            
+        
         #accumulate multinomial parameters
         if z >= 1:
             prob_topics_aux[z] += prob_topics_aux[z - 1]

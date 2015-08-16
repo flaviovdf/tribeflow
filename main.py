@@ -61,7 +61,7 @@ def main():
         comm = MPI.COMM_WORLD
         rank = comm.rank
         size = comm.size 
-        single_thread = size == 1
+        single_thread = size <= 1
     except:
         single_thread = True
     

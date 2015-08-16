@@ -36,12 +36,29 @@ def test_merge():
     tstamps, Trace, previous_stamps, Count_zh, Count_sz, count_h, count_z, \
             prob_topics_aux, Theta_zh, Psi_sz, hyper2id, source2id = \
             dataio.initialize_trace(files.SIZE10, 2, 10)
-    
+     
     kernel = ECCDFKernel()
     kernel.build(Trace.shape[0], Count_zh.shape[0], \
             np.array([1.0, Count_zh.shape[0] - 1]))
     
-    alpha_zh, beta_zs, beta_zd, a_ptz, b_ptz = [0.1] * 5
+    Trace[:, 0] = 0
+    Trace[:, 1] = 0
+    Trace[:, 2] = 0
+    Trace[:, 3] = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
+
+    Count_sz[:] = 0
+    Count_zh[:] = 0
+    count_z[:] = 0
+    count_h[:] = 0
+    
+    fast_populate(Trace, Count_zh, Count_sz, count_h, count_z)
+    C = dynamic.correlate_counts(Count_zh, Count_sz, count_h, count_z, .1, \
+            .1)
+    
+    alpha_zh, beta_zs, beta_zd = [0.1] * 3
+    a_ptz = 1.0
+    b_ptz = Count_zh.shape[0] - 1
+
     ll_per_z = np.zeros(2, dtype='f8')
 
     quality_estimate(tstamps, Trace, \
@@ -54,15 +71,13 @@ def test_merge():
             dynamic.merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, alpha_zh, beta_zs, ll_per_z, kernel)
     
-    #TODO: not the best test in the world, but it occurs sometimes
-    if Count_zh_new.shape[0] < Count_zh.shape[0]:
-        assert Count_zh_new.shape[0] < Count_zh.shape[0]
-        assert Count_zh_new.shape[1] == Count_zh.shape[1]
+    assert Count_zh_new.shape[0] < Count_zh.shape[0]
+    assert Count_zh_new.shape[1] == Count_zh.shape[1]
 
-        assert Count_sz_new.shape[0] == Count_sz.shape[0]
-        assert Count_sz_new.shape[1] < Count_sz.shape[0]
+    assert Count_sz_new.shape[0] == Count_sz.shape[0]
+    assert Count_sz_new.shape[1] < Count_sz.shape[0]
 
-        assert count_z_new.shape[0] < count_z.shape[0]
+    assert count_z_new.shape[0] < count_z.shape[0]
 
 def test_split():
 
@@ -75,7 +90,6 @@ def test_split():
 
     Trace[:, -1] = 0
     previous_stamps._clear()
-    
     tstamps = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 100, 200, 300, 400, 500])
     previous_stamps._extend(0, tstamps)
     
