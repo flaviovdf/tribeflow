@@ -314,22 +314,20 @@ def dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, count_h, \
 def generate_workload(nh, num_workers, Trace):
     hyperids = np.arange(nh)
     np.random.shuffle(hyperids)
-    workloads = []
 
-    for t in xrange(num_workers):
-        workloads.append([])
-
-    for h in xrange(nh):
-        workloads[h % num_workers].append(hyperids[h])
-
-    for t in xrange(num_workers):
-        workload_bool = np.zeros(Trace.shape[0], dtype='bool')
-        for i in xrange(len(workloads[t])):
-            workload_bool += Trace[:, 0] == workloads[t][i]
-
-        idx_workload = np.asarray(np.where(workload_bool)[0], dtype='i4')
-        workloads[t] = idx_workload 
-    return workloads 
+    hyper2worker = {}
+    for i in xrange(nh):
+        worker = i % num_workers
+        hyper2worker[hyperids[i]] = worker
+    
+    workloads = np.zeros(shape=(num_workers, Trace.shape[0]), dtype='bool')
+    for i in xrange(Trace.shape[0]):
+        h = Trace[i, 0]
+        worker = hyper2worker[h]
+        workloads[worker, i] = True
+    
+    assert workloads.sum() == Trace.shape[0]
+    return workloads
 
 def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, residency_priors, \
         num_iter, from_=0, to=np.inf):
@@ -378,10 +376,10 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, residency_priors, \
             dataio.initialize_trace(trace_fpath, num_topics, num_iter, \
             from_, to)
     
-    workloads = generate_workload(Count_zh.shape[1], num_workers, Trace)
     for worker_id in xrange(1, num_workers + 1):
         comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
     
+    workloads = generate_workload(Count_zh.shape[1], num_workers, Trace)
     dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, count_h, \
             count_z, alpha_zh, beta_zs, kernel, residency_priors, \
             workloads, num_workers, comm)
