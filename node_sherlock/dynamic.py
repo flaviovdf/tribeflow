@@ -232,7 +232,7 @@ def merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
     
     #k = int(np.ceil(np.sqrt(nz)))
     idx_dim1, idx_dim2 = \
-            np.unravel_index(C.flatten().argsort()[-nz:][::-1], C.shape)
+            np.unravel_index(C.flatten().argsort()[-nz:], C.shape)
     top_sims = zip(idx_dim1, idx_dim2)
 
     #New info
@@ -249,7 +249,7 @@ def merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
         if z1 in merged or z2 in merged:
             continue
         
-        if C[z1, z2] <= 0: #already at nonsimilar
+        if C[z1, z2] < 0: #already at nonsimilar
             break
     
         Count_zh_mrg[:] = Count_zh
@@ -407,7 +407,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
             print('Computing probs')
     	    _learn._aggregate(Count_zh, Count_sz, count_h, count_z, \
                 alpha_zh, beta_zs, Theta_zh, Psi_sz)
-        print('New nz', Count_zh.shape[1]) 
+        print('New nz', Count_zh.shape[0]) 
     if mpi_mode:
         for worker_id in xrange(1, num_workers + 1):
             comm.send(num_iter, dest=worker_id, tag=Msg.STOP.value)

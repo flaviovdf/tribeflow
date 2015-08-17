@@ -28,7 +28,7 @@ import time
 Msg = Enum('Msg', ['STARTED', 'FINISHED', 'PAIRME', 'PAIRED', \
         'LEARN', 'SENDRESULTS', 'STOP'])
 MASTER = 0
-CACHE_SIZE = 10
+CACHE_SIZE = 1
 
 def paired_update(comm, previous_encounters_s, Count_sz_local, Count_sz_pair, \
         Count_sz_others, P_local, P_pair):
@@ -110,7 +110,7 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, \
         previous_encounters_s[other_processor] = np.zeros_like(Count_sz_local)
 
     stamps = StampLists(Count_zh.shape[0])
-    for z in xrange(Count_zh.shape[1]):
+    for z in xrange(Count_zh.shape[0]):
         idx = Trace[:, -1] == z
         stamps._extend(z, tstamps[idx])
     
@@ -375,7 +375,6 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, residency_priors, \
             hyper2id, source2id = \
             dataio.initialize_trace(trace_fpath, num_topics, num_iter, \
             from_, to)
-    
     for worker_id in xrange(1, num_workers + 1):
         comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
     
