@@ -74,8 +74,9 @@ cdef class StampLists:
     
     def _extend(self, int topic, double[:] values):
         cdef int i
-        for i in range(values.shape[0]):
-            self.append(topic, values[i])
+        with nogil:
+            for i in range(values.shape[0]):
+                self.append(topic, values[i])
 
     cdef double get(self, int topic, int idx) nogil:
         if idx >= self.curr_sizes[topic]:
@@ -95,8 +96,9 @@ cdef class StampLists:
         cdef double[::1] rv = np.zeros(t_size) 
         
         cdef int i
-        for i in range(t_size):
-            rv[i] = self.values[topic][i]
+        with nogil:
+            for i in range(t_size):
+                rv[i] = self.values[topic][i]
         return rv
 
     cdef int size(self, int topic) nogil:
