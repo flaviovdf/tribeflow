@@ -232,7 +232,7 @@ def merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
     
     #k = int(np.ceil(np.sqrt(nz)))
     idx_dim1, idx_dim2 = \
-            np.unravel_index(C.flatten().argsort()[-nz:], C.shape)
+            np.unravel_index(C.flatten().argsort()[-nz:][::-1], C.shape)
     top_sims = zip(idx_dim1, idx_dim2)
 
     #New info
