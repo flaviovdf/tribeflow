@@ -21,7 +21,6 @@ def main(model, out_fpath):
 
     Theta_zh = store['Theta_zh'].values
     Psi_sz = store['Psi_sz'].values
-    Psi_dz = store['Psi_dz'].values
     count_z = store['count_z'].values[:, 0]
     P = store['P'].values
     residency_priors = store['residency_priors'].values[:, 0]
@@ -34,8 +33,7 @@ def main(model, out_fpath):
         previous_stamps._extend(z, tstamps[idx])
 
     hyper2id = dict(store['hyper2id'].values)
-    source2id = dict(store['source2id'].values)
-    dest2id = dict(store['dest2id'].values)
+    obj2id = dict(store['source2id'].values)
     
     HSDs = []
     tstamps = []
@@ -46,8 +44,8 @@ def main(model, out_fpath):
                 continue
 
             dt, h, s, d = l.strip().split('\t')
-            if h in hyper2id and s in source2id and d in dest2id:
-                HSDs.append([hyper2id[h], source2id[s], dest2id[d]])
+            if h in hyper2id and s in obj2id and d in obj2id:
+                HSDs.append([hyper2id[h], obj2id[s], obj2id[d]])
                 tstamps.append(float(dt))
     
     trace_size = sum(count_z)
@@ -61,7 +59,7 @@ def main(model, out_fpath):
     HSDs = np.array(HSDs, dtype='i4')[queries].copy()
     tstamps = np.array(tstamps, dtype='d')[queries].copy()
     rrs = _learn.mean_reciprocal_rank(tstamps, \
-            HSDs, previous_stamps, Theta_zh, Psi_sz, Psi_dz, count_z, kernel)
+            HSDs, previous_stamps, Theta_zh, Psi_sz, count_z, kernel)
     
     np.savetxt(out_fpath, rrs)
     store.close()

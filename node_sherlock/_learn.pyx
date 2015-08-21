@@ -69,7 +69,7 @@ def _aggregate(Count_zh, Count_sz, count_h, count_z, \
     aggregate(Count_zh, Count_sz, count_h, count_z, alpha_zh, beta_zs, \
             Theta_zh, Psi_sz)
 
-cdef double dir_posterior(double joint_count, double global_count, \
+cdef inline double dir_posterior(double joint_count, double global_count, \
         double num_occurences, double smooth) nogil:
 
     cdef double numerator = smooth + joint_count
@@ -98,7 +98,8 @@ cdef int sample(double dt, int hyper, int source, int dest, \
         prob_topics_aux[z] = kernel.pdf(dt, z, previous_stamps) * \
             dir_posterior(Count_zh[z, hyper], count_h[hyper], nz, alpha_zh) * \
             dir_posterior(Count_sz[source, z], count_z[z], ns, beta_zs) * \
-            dir_posterior(Count_sz[dest, z], count_z[z], ns, beta_zs)
+            dir_posterior(Count_sz[dest, z], count_z[z], ns, beta_zs) / \
+            (1 - dir_posterior(Count_sz[source, z], count_z[z], ns, beta_zs))
         
         #accumulate multinomial parameters
         if z >= 1:
@@ -115,7 +116,7 @@ def _sample(dt, hyper, source, dest, previous_stamps, Count_zh, Count_sz, \
             Count_sz, count_h, count_z, alpha_zh, beta_zs, prob_topics_aux, \
             kernel)
 
-cdef void e_step(double[::1] dts, int[:,::1] Trace, \
+cdef inline void e_step(double[::1] dts, int[:,::1] Trace, \
         StampLists previous_stamps, int[:,::1] Count_zh, int[:,::1] Count_sz, \
         int[::1] count_h, int[::1] count_z, double alpha_zh, double beta_zs, \
         double[::1] prob_topics_aux, Kernel kernel) nogil:
@@ -136,8 +137,8 @@ cdef void e_step(double[::1] dts, int[:,::1] Trace, \
         Count_sz[source, old_topic] -= 1
         Count_sz[dest, old_topic] -= 1
         count_h[hyper] -= 1
-        count_z[old_topic] -= 1
-
+        count_z[old_topic] -= 2
+        
         new_topic = sample(dt, hyper, source, dest, previous_stamps, Count_zh, \
                 Count_sz, count_h, count_z, alpha_zh, beta_zs, \
                 prob_topics_aux, kernel)
@@ -147,7 +148,7 @@ cdef void e_step(double[::1] dts, int[:,::1] Trace, \
         Count_sz[source, new_topic] += 1
         Count_sz[dest, new_topic] += 1
         count_h[hyper] += 1
-        count_z[new_topic] += 1
+        count_z[new_topic] += 2
 
 def _e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
         count_z, alpha_zh, beta_zs, prob_topics_aux, kernel):
@@ -155,7 +156,7 @@ def _e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
     e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
             count_z, alpha_zh, beta_zs, prob_topics_aux, kernel)
 
-cdef void m_step(double[::1] dts, int[:,::1] Trace, \
+cdef inline void m_step(double[::1] dts, int[:,::1] Trace, \
         StampLists previous_stamps, Kernel kernel) nogil:
     
     previous_stamps.clear()
