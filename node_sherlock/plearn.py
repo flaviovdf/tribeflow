@@ -127,6 +127,7 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, \
     for i in xrange(num_iter // CACHE_SIZE):
         #Sample from the local counts and encountered counts
         Count_sz_sum[:] = Count_sz_local + Count_sz_others
+        count_z[:] = Count_sz_sum.sum(axis=0)
         
         em(tstamps, Trace, stamps, Count_zh, Count_sz_sum, \
                 count_h, count_z, alpha_zh, beta_zs, aux, Theta_zh, \
@@ -134,7 +135,8 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, \
 
         #Update local counts
         Count_sz_local[:] = Count_sz_sum - Count_sz_others
-        
+        count_z[:] = Count_sz_local.sum(axis=0)
+
         #Update expected belief of other processors
         if can_pair:
             P_local = kernel.get_state()
