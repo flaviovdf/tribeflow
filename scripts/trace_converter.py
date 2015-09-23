@@ -26,6 +26,8 @@ def main():
             help='Scale the time by this value', type=float, default=1.0)
     parser.add_argument('-k', '--skip_header', \
             help='Skip these first k lines', type=int, default=0)
+    parser.add_argument('-m', '--mem_size', \
+            help='Memory Size (the markov order is m - 1)', type=int, default=1)
     args = parser.parse_args()
     
     delim = args.delimiter
@@ -35,6 +37,7 @@ def main():
     fmt = args.fmt
     consider_loops = args.loops
     skip = args.skip_header
+    mem_size = args.mem_size
 
     def parser(s):
         if fmt:
@@ -58,19 +61,38 @@ def main():
                     yield [t, h, o]
              
     last = {}
-    if args.sort:
+    if bool(args.sort):
         trace = sorted(gen())
     else:
         trace = gen()
-
+    
     for t_now, h_now, o_now in trace:
-        if h_now in last:
-            t_prev, o_prev = last[h_now]
+        if h_now in last and len(last[h_now]) == mem_size:
+            t_prev, o_prev = last[h_now][-1]
             if o_prev == o_now and not consider_loops:
                 continue
-            print(t_now - t_prev, h_now.strip(), o_now.strip(), \
-                    sep='\t')
-        last[h_now] = (t_now, o_now)
+            
+            mem = last[h_now]
+            for i in xrange(1, mem_size):
+                print(mem[i][0] - mem[i - 1][0], end='\t')
+            
+            print(t_now - t_prev, end='\t')
+            print(h_now.strip(), end='\t')
+            for i in xrange(mem_size):
+                print(mem[i][1].strip(), end='\t')
+            
+            print(o_now.strip())
+        elif h_now not in last:
+            last[h_now] = []
+        
+        append = len(last[h_now]) == 0 or \
+                consider_loops or \
+                ((not consider_loops) and o_now != last[h_now][-1][1]) 
+        
+        if append:
+            last[h_now].append((t_now, o_now))
+            if len(last[h_now]) > mem_size:
+                del last[h_now][0]
 
 if __name__ == '__main__':
     main()

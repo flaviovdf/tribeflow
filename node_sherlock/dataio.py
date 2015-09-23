@@ -32,57 +32,67 @@ def initialize_trace(trace_fpath, num_topics, num_iter, \
     hyper2id = OrderedDict()
     obj2id = OrderedDict()
     
-    topic_stamps_dict = defaultdict(list)
     if initial_assign:
         initial_assign = np.asarray(initial_assign, dtype='i')
         assert initial_assign.min() >= 0
         assert initial_assign.max() < num_topics
 
-    dts = []
+    Dts = []
     Trace = []
     with open(trace_fpath, 'r') as trace_file:
         for i, line in enumerate(trace_file):
-            if i < from_ or i >= to:
+            if i < from_: 
                 continue
-            
-            dt, hyper_str, source_str, dest_str = line.strip().split('\t')
-            dt = float(dt)
 
+            if i >= to:
+                break
+
+            spl = line.strip().split('\t')
+            assert len(spl) >= 4
+            assert (len(spl) - 2) % 2 == 0
+            mem_size = (len(spl) - 2) // 2
+            
+            line_dts = []
+            for j in xrange(mem_size):
+                line_dts.append(float(spl[j]))
+            Dts.append(line_dts)
+
+            hyper_str = spl[mem_size]
             if hyper_str not in hyper2id:
                 hyper2id[hyper_str] = len(hyper2id)
-            
-            if source_str not in obj2id:
-                obj2id[source_str] = len(obj2id)
-            
-            if dest_str not in obj2id:
-                obj2id[dest_str] = len(obj2id)
-            
-            h = hyper2id[hyper_str]
-            s = obj2id[source_str]
-            d = obj2id[dest_str]
             
             if not initial_assign:
                 z = np.random.randint(num_topics)
             else:
                 z = initial_assign[i]
 
+            h = hyper2id[hyper_str]
             count_zh_dict[z, h] += 1
-            count_oz_dict[s, z] += 1
-            count_oz_dict[d, z] += 1
-            count_z_dict[z] += 2 #Two because 1 for source 1 for dest.
             count_h_dict[h] += 1
             
-            topic_stamps_dict[z].append(i)
-            dts.append(dt)
-            Trace.append([h, s, d, z])
+            line_int = [h]
+            for j in xrange(mem_size + 1, len(spl)):
+                obj_str = spl[j]
+                
+                if obj_str not in obj2id:
+                    obj2id[obj_str] = len(obj2id)
+            
+                o = obj2id[obj_str]
+                line_int.append(o)
+                
+                count_oz_dict[o, z] += 1
+                count_z_dict[z] += 1 
+                       
+            line_int.append(z)
+            Trace.append(line_int)
     
-    #Sort by the residency time. 
-    dts = np.asarray(dts)
-    argsort = dts.argsort()
-    dts = dts[argsort]
+    #Sort by the last residency time. 
+    Dts = np.asarray(Dts)
+    argsort = Dts[:, -1].argsort()
+    assert Dts.shape[1] == mem_size
 
     #Create contiguous arrays, not needed but adds a small speedup
-    dts = np.asanyarray(dts, order='C')
+    Dts = np.asanyarray(Dts[argsort], order='C')
     Trace = np.asarray(Trace)
     Trace = np.asanyarray(Trace[argsort], dtype='i4', order='C')
 
@@ -93,7 +103,7 @@ def initialize_trace(trace_fpath, num_topics, num_iter, \
     previous_stamps = StampLists(num_topics)
     for z in xrange(nz):
         idx = Trace[:, -1] == z
-        topic_stamps = dts[idx]
+        topic_stamps = Dts[:, -1][idx]
         previous_stamps._extend(z, topic_stamps)
 
     Count_zh = np.zeros(shape=(nz, nh), dtype='i4')
@@ -110,11 +120,13 @@ def initialize_trace(trace_fpath, num_topics, num_iter, \
 
         for o in xrange(Count_oz.shape[0]):
             Count_oz[o, z] = count_oz_dict[o, z]
+    
+    assert (Count_oz.sum(axis=0) == count_z).all()
 
     prob_topics_aux = np.zeros(nz, dtype='f8')
     Theta_zh = np.zeros(shape=(nz, nh), dtype='f8')
     Psi_oz = np.zeros(shape=(no, nz), dtype='f8')
     
-    return dts, Trace, previous_stamps, Count_zh, Count_oz, \
+    return Dts, Trace, previous_stamps, Count_zh, Count_oz, \
             count_h, count_z, prob_topics_aux, Theta_zh, Psi_oz, \
             hyper2id, obj2id

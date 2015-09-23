@@ -17,7 +17,7 @@ from node_sherlock.plearn import Msg
 import _learn
 import numpy as np
 
-def finalize_splits(nz, n_splits, splitted, tstamps, Trace, nh, ns, kernel):
+def finalize_splits(nz, n_splits, splitted, Dts, Trace, nh, ns, kernel):
     
     new_nz = nz + n_splits 
     if kernel.get_priors().shape[0] > 0:
@@ -41,13 +41,13 @@ def finalize_splits(nz, n_splits, splitted, tstamps, Trace, nh, ns, kernel):
     new_stamps = StampLists(new_nz)
     for z in xrange(new_nz):
         idx = Trace[:, -1] == z
-        topic_stamps = tstamps[idx]
-        new_stamps._extend(z, topic_stamps)
+        topic_stamps = Dts[idx]
+        new_stamps._extend(z, topic_stamps[:, -1])
 
     return Trace, Count_zh_new, Count_sz_new, \
             count_z_new, new_stamps, np.array(new_P)
 
-def split(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
+def split(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
         count_h, count_z, alpha_zh, beta_zs, ll_per_z, kernel, \
         perc=0.05, min_stamps=50):
     
@@ -120,7 +120,7 @@ def split(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
         ll_per_z_new[-1] = 0
         
         idx_int = idx_int_all[idx]
-        _learn.quality_estimate(tstamps, Trace, \
+        _learn.quality_estimate(Dts, Trace, \
                 new_stamps, Count_zh_spl, Count_sz_spl, count_h, \
                 count_z_spl, alpha_zh, beta_zs, \
                 ll_per_z_new, idx_int, kernel)
@@ -147,7 +147,7 @@ def split(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
         ll_per_z_new[-1] = 0
         Trace[:, -1][idx] = old_assign
     
-    return finalize_splits(nz, shift, splitted, tstamps, Trace, nh, ns, kernel)
+    return finalize_splits(nz, shift, splitted, Dts, Trace, nh, ns, kernel)
 
 def correlate_counts(Count_zh, Count_sz, count_h, count_z, \
         alpha_zh, beta_zs):
@@ -171,7 +171,7 @@ def correlate_counts(Count_zh, Count_sz, count_h, count_z, \
     C = np.triu(C, 1)
     return C
 
-def finalize_merge(nz, to_merge, tstamps, Trace, nh, ns, kernel):
+def finalize_merge(nz, to_merge, Dts, Trace, nh, ns, kernel):
      
     for z1, z2 in to_merge:
         idx = Trace[:, -1] == z2
@@ -211,13 +211,13 @@ def finalize_merge(nz, to_merge, tstamps, Trace, nh, ns, kernel):
     new_stamps = StampLists(new_nz)
     for z in xrange(new_nz):
         idx = Trace[:, -1] == z
-        topic_stamps = tstamps[idx]
-        new_stamps._extend(z, topic_stamps)
+        topic_stamps = Dts[idx]
+        new_stamps._extend(z, topic_stamps[:, -1])
 
     return Trace, Count_zh_new, Count_sz_new, \
             count_z_new, new_stamps, np.array(new_P)
 
-def merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
+def merge(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
         count_h, count_z, alpha_zh, beta_zs, ll_per_z, kernel):
 
     nz = Count_zh.shape[0]
@@ -278,7 +278,7 @@ def merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
         ll_per_z_new = ll_per_z.copy()
         ll_per_z_new[z2] = 0
 
-        _learn.quality_estimate(tstamps, Trace, \
+        _learn.quality_estimate(Dts, Trace, \
                 new_stamps, Count_zh_mrg, Count_sz_mrg, count_h, \
                 count_z_mrg, alpha_zh, beta_zs, \
                 ll_per_z_new, idx_int, kernel)
@@ -295,7 +295,7 @@ def merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
         new_stamps._extend(z1, previous_stamps._get_all(z1))
         new_stamps._extend(z2, previous_stamps._get_all(z2))
     
-    return finalize_merge(nz, accepted, tstamps, Trace, nh, ns, kernel) 
+    return finalize_merge(nz, accepted, Dts, Trace, nh, ns, kernel) 
 
 def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
         residency_priors, num_iter, num_batches, mpi_mode, from_=0, to=np.inf):
@@ -342,7 +342,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
     comm = MPI.COMM_WORLD
     num_workers = comm.size - 1
 
-    tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
+    Dts, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, prob_topics_aux, Theta_zh, Psi_sz, \
             hyper2id, source2id = \
             dataio.initialize_trace(trace_fpath, num_topics, num_iter, \
@@ -358,28 +358,28 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
             for worker_id in xrange(1, num_workers + 1):
                 comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
 
-            dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, \
+            dispatch_jobs(Dts, Trace, Count_zh, Count_sz, \
                     count_h, count_z, alpha_zh, beta_zs, kernel, \
                     residency_priors, workloads, num_workers, comm)
             manage(comm, num_workers)
-            fetch_results(comm, num_workers, workloads, tstamps, Trace, \
+            fetch_results(comm, num_workers, workloads, Dts, Trace, \
                     previous_stamps, Count_zh, Count_sz, count_h, \
                     count_z, alpha_zh, beta_zs, Theta_zh, Psi_sz, \
                     kernel)
         else:
             prob_topics_aux = np.zeros(Count_zh.shape[0], dtype='f8')
-            _learn.em(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
+            _learn.em(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
                     count_h, count_z, alpha_zh, beta_zs, \
                     prob_topics_aux, Theta_zh, Psi_sz, num_iter, \
                     num_iter * 2, kernel, False)
         
         print('Split')
         ll_per_z = np.zeros(count_z.shape[0], dtype='f8')
-        _learn.quality_estimate(tstamps, Trace, previous_stamps, \
+        _learn.quality_estimate(Dts, Trace, previous_stamps, \
                 Count_zh, Count_sz, count_h, count_z, alpha_zh, \
                 beta_zs, ll_per_z, all_idx, kernel)
         Trace, Count_zh, Count_sz, count_z, previous_stamps, \
-                P = split(tstamps, Trace, previous_stamps, Count_zh, \
+                P = split(Dts, Trace, previous_stamps, Count_zh, \
                 Count_sz, count_h, count_z, alpha_zh, beta_zs, \
                 ll_per_z, kernel)
         kernel = kernel.__class__()
@@ -389,11 +389,11 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
 
         print('Merge')
         ll_per_z = np.zeros(count_z.shape[0], dtype='f8')
-        _learn.quality_estimate(tstamps, Trace, previous_stamps, \
+        _learn.quality_estimate(Dts, Trace, previous_stamps, \
                 Count_zh, Count_sz, count_h, count_z, alpha_zh, \
                 beta_zs, ll_per_z, all_idx, kernel)
         Trace, Count_zh, Count_sz, count_z, previous_stamps, \
-                P = merge(tstamps, Trace, previous_stamps, Count_zh, \
+                P = merge(Dts, Trace, previous_stamps, Count_zh, \
                 Count_sz, count_h, count_z, alpha_zh, beta_zs, \
                 ll_per_z, kernel)
         kernel = kernel.__class__()
@@ -413,7 +413,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
             comm.send(num_iter, dest=worker_id, tag=Msg.STOP.value)
     
     rv = prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
-            kernel, residency_priors, num_iter, -1, tstamps, Trace, \
+            kernel, residency_priors, num_iter, -1, Dts, Trace, \
             Count_zh, Count_sz, count_h, count_z, prob_topics_aux, Theta_zh, \
             Psi_sz, hyper2id, source2id, from_, to)
 

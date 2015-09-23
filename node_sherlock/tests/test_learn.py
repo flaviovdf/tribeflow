@@ -32,7 +32,7 @@ def test_sample():
     dest = Trace[tstamp_idx, 2]
     old_topic = Trace[tstamp_idx, 3]
 
-    new_topic = _learn._sample(tstamp_idx, hyper, source, dest, \
+    new_topic = _learn._sample(tstamp_idx, tstamps, Trace, \
             previous_stamps, Count_zh, Count_sz, count_h, \
             count_z, .1, .1, prob_topics_aux, kernel)
     

@@ -10,7 +10,7 @@ import numpy as np
 import os
 
 def prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
-        kernel, residency_priors, num_iter, burn_in, tstamps, Trace, \
+        kernel, residency_priors, num_iter, burn_in, Dts, Trace, \
         Count_zh, Count_sz, count_h, count_z, \
         prob_topics_aux, Theta_zh, Psi_sz, hyper2id, source2id, \
         from_, to):
@@ -29,7 +29,7 @@ def prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
     rv['from_'] = np.asarray([from_])
     rv['to'] = np.asarray([to])
     
-    rv['tstamps'] = tstamps
+    rv['Dts'] = Dts
     rv['Count_zh'] = Count_zh
     rv['Count_sz'] = Count_sz
     rv['count_h'] = count_h
@@ -92,19 +92,19 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
     TODO: explain this better. For the time being, see the keys of the dict.
     A dictionary with the results.
     '''
-    tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
+    Dts, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, prob_topics_aux, Theta_zh, Psi_sz, \
             hyper2id, source2id = \
             dataio.initialize_trace(trace_fpath, num_topics, num_iter, \
             from_, to)
     
-    em(tstamps, Trace, previous_stamps, Count_zh, \
+    em(Dts, Trace, previous_stamps, Count_zh, \
             Count_sz, count_h, count_z, alpha_zh, beta_zs, \
             prob_topics_aux, Theta_zh, Psi_sz, num_iter, \
             burn_in, kernel)
     
     rv = prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
-            kernel, residency_priors, num_iter, burn_in, tstamps, Trace, \
+            kernel, residency_priors, num_iter, burn_in, Dts, Trace, \
             Count_zh, Count_sz, count_h, \
             count_z, prob_topics_aux, Theta_zh, Psi_sz, hyper2id, \
             source2id, from_, to)

@@ -64,7 +64,7 @@ def paired_update(comm, previous_encounters_s, Count_sz_local, Count_sz_pair, \
     return True
 
 def receive_workload(comm):
-    sizes = np.zeros(5, dtype='i')
+    sizes = np.zeros(6, dtype='i')
     comm.Recv([sizes, MPI.INT], source=MASTER)
 
     num_lines = sizes[0]
@@ -72,18 +72,18 @@ def receive_workload(comm):
     nh = sizes[2]
     ns = sizes[3]
     n_residency_priors = sizes[4]
-    
+    mem_size = sizes[5]
+
     Count_zh = np.zeros(shape=(nz, nh), dtype='i4') 
     Count_sz = np.zeros(shape=(ns, nz), dtype='i4')
     count_h = np.zeros(shape=(nh, ), dtype='i4')
     count_z = np.zeros(shape=(nz, ), dtype='i4')
     
-    tstamps = np.zeros(shape=(num_lines, ), dtype='f8')
-    Trace = np.zeros(shape=(num_lines, 4), dtype='i4')
+    Dts = np.zeros(shape=(num_lines, mem_size), dtype='f8')
+    Trace = np.zeros(shape=(num_lines, 2 + (mem_size + 1)), dtype='i4')
 
-    comm.Recv([tstamps, MPI.DOUBLE], source=MASTER)
+    comm.Recv([Dts, MPI.DOUBLE], source=MASTER)
     comm.Recv([Trace, MPI.INT], source=MASTER)
-
     priors = np.zeros(2 + n_residency_priors, dtype='f8')
     comm.Recv([priors, MPI.DOUBLE], source=MASTER)
     
@@ -99,10 +99,10 @@ def receive_workload(comm):
     if n_residency_priors > 0:
         kernel.update_state(P)
     
-    return tstamps, Trace, Count_zh, Count_sz, \
+    return Dts, Trace, Count_zh, Count_sz, \
             count_h, count_z, alpha_zh, beta_zs, kernel
 
-def sample(tstamps, Trace, Count_zh, Count_sz_local, \
+def sample(Dts, Trace, Count_zh, Count_sz_local, \
         count_h, count_z, alpha_zh, beta_zs, kernel, num_iter, comm):
     
     previous_encounters_s = {}
@@ -112,7 +112,9 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, \
     stamps = StampLists(Count_zh.shape[0])
     for z in xrange(Count_zh.shape[0]):
         idx = Trace[:, -1] == z
-        stamps._extend(z, tstamps[idx])
+        #dts_assigned = Dts[idx:, 0].ravel().copy()
+        #np.sort(dts_assigned)
+        stamps._extend(z, Dts[idx][:, -1])
     
     aux = np.zeros(Count_zh.shape[0], dtype='f8')
  
@@ -129,7 +131,7 @@ def sample(tstamps, Trace, Count_zh, Count_sz_local, \
         Count_sz_sum[:] = Count_sz_local + Count_sz_others
         count_z[:] = Count_sz_sum.sum(axis=0)
         
-        em(tstamps, Trace, stamps, Count_zh, Count_sz_sum, \
+        em(Dts, Trace, stamps, Count_zh, Count_sz_sum, \
                 count_h, count_z, alpha_zh, beta_zs, aux, Theta_zh, \
                 Psi_sz, CACHE_SIZE, CACHE_SIZE * 2, kernel, False)
 
@@ -162,11 +164,11 @@ def work():
 
             num_iter = msg
 
-            tstamps, Trace, Count_zh, Count_sz, count_h, count_z, \
+            Dts, Trace, Count_zh, Count_sz, count_h, count_z, \
                     alpha_zh, beta_zs, kernel = receive_workload(comm)
             fast_populate(Trace, Count_zh, Count_sz, count_h, \
                     count_z)
-            sample(tstamps, Trace, Count_zh, Count_sz, count_h, \
+            sample(Dts, Trace, Count_zh, Count_sz, count_h, \
                     count_z, alpha_zh, beta_zs, kernel, num_iter, \
                     comm)
             
@@ -186,7 +188,7 @@ def work():
     #pr.disable()
     #pr.dump_stats('worker-%d.pstats' % rank)
 
-def fetch_results(comm, num_workers, workloads, tstamps, Trace, \
+def fetch_results(comm, num_workers, workloads, Dts, Trace, \
         previous_stamps, Count_zh, Count_sz, count_h, count_z, \
         alpha_zh, beta_zs, Theta_zh, Psi_sz, kernel):
     
@@ -242,7 +244,9 @@ def fetch_results(comm, num_workers, workloads, tstamps, Trace, \
 
     for z in xrange(Count_zh.shape[0]):
         previous_stamps._clear_one(z)
-        previous_stamps._extend(z, tstamps[Trace[:, -1] == z])
+        #dts_assigned = Dts[Trace[:, -1] == z].ravel().copy()
+        #np.sort(dts_assigned)
+        previous_stamps._extend(z, Dts[Trace[:, -1] == z][:, -1])
 
 def manage(comm, num_workers):
     available_to_pair = -1
@@ -286,22 +290,23 @@ def manage(comm, num_workers):
         else:
             print(0, 'Unknown message received', worker_id, event, Msg(event))
 
-def dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, count_h, \
+def dispatch_jobs(Dts, Trace, Count_zh, Count_sz, count_h, \
         count_z, alpha_zh, beta_zs, kernel, residency_priors, \
         workloads, num_workers, comm):
     
     for worker_id in xrange(1, num_workers + 1):
         idx = workloads[worker_id - 1]
         
-        sizes = np.zeros(5, dtype='i')
+        sizes = np.zeros(6, dtype='i')
         sizes[0] = Trace[idx].shape[0] 
         sizes[1] = Count_zh.shape[0]
         sizes[2] = Count_zh.shape[1]
         sizes[3] = Count_sz.shape[0]
         sizes[4] = residency_priors.shape[0]
-        
+        sizes[5] = Dts.shape[1]
+
         comm.Send([sizes, MPI.INT], dest=worker_id)
-        comm.Send([tstamps[idx], MPI.INT], dest=worker_id)
+        comm.Send([Dts[idx], MPI.INT], dest=worker_id)
         comm.Send([Trace[idx], MPI.INT], dest=worker_id)
 
         priors = np.zeros(2 + residency_priors.shape[0], dtype='f8')
@@ -372,7 +377,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, residency_priors, \
     comm = MPI.COMM_WORLD
     num_workers = comm.size - 1
 
-    tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
+    Dts, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, prob_topics_aux, Theta_zh, Psi_sz, \
             hyper2id, source2id = \
             dataio.initialize_trace(trace_fpath, num_topics, num_iter, \
@@ -381,11 +386,11 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, residency_priors, \
         comm.send(num_iter, dest=worker_id, tag=Msg.LEARN.value)
     
     workloads = generate_workload(Count_zh.shape[1], num_workers, Trace)
-    dispatch_jobs(tstamps, Trace, Count_zh, Count_sz, count_h, \
+    dispatch_jobs(Dts, Trace, Count_zh, Count_sz, count_h, \
             count_z, alpha_zh, beta_zs, kernel, residency_priors, \
             workloads, num_workers, comm)
     manage(comm, num_workers)
-    fetch_results(comm, num_workers, workloads, tstamps, Trace, previous_stamps,\
+    fetch_results(comm, num_workers, workloads, Dts, Trace, previous_stamps, \
             Count_zh, Count_sz, count_h, count_z, alpha_zh, \
             beta_zs, Theta_zh, Psi_sz, kernel)
 
@@ -393,7 +398,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, residency_priors, \
         comm.send(worker_id, dest=worker_id, tag=Msg.STOP.value)
 
     rv = prepare_results(trace_fpath, num_topics, alpha_zh, beta_zs, \
-            kernel, residency_priors, num_iter, -1, tstamps, \
+            kernel, residency_priors, num_iter, -1, Dts, \
             Trace, Count_zh, Count_sz, count_h, \
             count_z, prob_topics_aux, Theta_zh, Psi_sz, hyper2id, \
             source2id, from_, to)

@@ -71,6 +71,7 @@ def test_merge():
             dynamic.merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, alpha_zh, beta_zs, ll_per_z, kernel)
     
+    assert len(new_stamps._get_all(0)) == 10
     assert Count_zh_new.shape[0] < Count_zh.shape[0]
     assert Count_zh_new.shape[1] == Count_zh.shape[1]
 
@@ -90,8 +91,9 @@ def test_split():
 
     Trace[:, -1] = 0
     previous_stamps._clear()
-    tstamps = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 100, 200, 300, 400, 500])
-    previous_stamps._extend(0, tstamps)
+    tstamps = np.array([[1.0, 2.0, 3.0, 4.0, 5.0, 100, 200, 300, 400, 500]]).T
+    tstamps = np.array(tstamps, order='C')
+    previous_stamps._extend(0, tstamps[:, 0])
     
     Count_zh = np.zeros(shape=(1, Count_zh.shape[1]), dtype='i4')
     Count_sz = np.zeros(shape=(Count_sz.shape[0], 1), dtype='i4')

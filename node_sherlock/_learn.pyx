@@ -84,22 +84,31 @@ def _dir_posterior(joint_count, global_count, num_occurences, smooth):
     '''Wrapper used mostly for unit tests. Do not call directly otherwise'''
     return dir_posterior(joint_count, global_count, num_occurences, smooth)
 
-cdef int sample(double dt, int hyper, int source, int dest, \
+cdef inline int sample(int idx, double[:,::1] Dts, int[:,::1] Trace, \
         StampLists previous_stamps, \
         int[:,::1] Count_zh, int[:,::1] Count_sz, int[::1] count_h, \
         int[::1] count_z, double alpha_zh, double beta_zs, \
         double[::1] prob_topics_aux, Kernel kernel) nogil:
-    
+     
     cdef int nz = Count_zh.shape[0]
     cdef int ns = Count_sz.shape[0]
-    cdef int z = 0
-    
+    cdef int z, j
+    cdef int hyper = Trace[idx, 0]
+    cdef double dt = Dts[idx, Dts.shape[1] - 1]
+    cdef int last_obj = Trace[idx, Trace.shape[1] - 2]
+    cdef int obj
+
     for z in xrange(nz):
         prob_topics_aux[z] = kernel.pdf(dt, z, previous_stamps) * \
-            dir_posterior(Count_zh[z, hyper], count_h[hyper], nz, alpha_zh) * \
-            dir_posterior(Count_sz[source, z], count_z[z], ns, beta_zs) * \
-            dir_posterior(Count_sz[dest, z], count_z[z], ns, beta_zs) / \
-            (1 - dir_posterior(Count_sz[source, z], count_z[z], ns, beta_zs))
+            dir_posterior(Count_zh[z, hyper], count_h[hyper], nz, alpha_zh)
+
+        for j in xrange(1, Trace.shape[1] - 1):
+            obj = Trace[idx, j]
+            prob_topics_aux[z] = prob_topics_aux[z] * \
+                    dir_posterior(Count_sz[obj, z], count_z[z], ns, beta_zs)
+
+        prob_topics_aux[z] = prob_topics_aux[z] / \
+            (1 - dir_posterior(Count_sz[last_obj, z], count_z[z], ns, beta_zs))
         
         #accumulate multinomial parameters
         if z >= 1:
@@ -109,54 +118,56 @@ cdef int sample(double dt, int hyper, int source, int dest, \
     cdef int new_topic = bsp(&prob_topics_aux[0], u, nz)
     return new_topic
 
-def _sample(dt, hyper, source, dest, previous_stamps, Count_zh, Count_sz, \
+def _sample(idx, Dts, Trace, previous_stamps, Count_zh, Count_sz, \
         count_h, count_z, alpha_zh, beta_zs, prob_topics_aux, kernel):
     '''Wrapper used mostly for unit tests. Do not call directly otherwise'''
-    return sample(dt, hyper, source, dest, previous_stamps, Count_zh, \
+    return sample(idx, Dts, Trace, previous_stamps, Count_zh, \
             Count_sz, count_h, count_z, alpha_zh, beta_zs, prob_topics_aux, \
             kernel)
 
-cdef inline void e_step(double[::1] dts, int[:,::1] Trace, \
+cdef inline void e_step(double[:,::1] Dts, int[:,::1] Trace, \
         StampLists previous_stamps, int[:,::1] Count_zh, int[:,::1] Count_sz, \
         int[::1] count_h, int[::1] count_z, double alpha_zh, double beta_zs, \
         double[::1] prob_topics_aux, Kernel kernel) nogil:
     
     cdef double dt    
-    cdef int hyper, source, dest, old_topic
-    cdef int new_topic
+    cdef int hyper, obj, old_topic, new_topic
     cdef int i, j
-    
+    cdef int mem_size = Dts.shape[0]
+
     for i in xrange(Trace.shape[0]):
-        dt = dts[i]
+        dt = Dts[i, Dts.shape[1] - 1]
         hyper = Trace[i, 0]
-        source = Trace[i, 1]
-        dest = Trace[i, 2]
-        old_topic = Trace[i, 3]
+        old_topic = Trace[i, Trace.shape[1] - 1]
 
         Count_zh[old_topic, hyper] -= 1
-        Count_sz[source, old_topic] -= 1
-        Count_sz[dest, old_topic] -= 1
         count_h[hyper] -= 1
-        count_z[old_topic] -= 2
         
-        new_topic = sample(dt, hyper, source, dest, previous_stamps, Count_zh, \
+        for j in xrange(1, Trace.shape[1] - 1):
+            obj = Trace[i, j]
+            Count_sz[obj, old_topic] -= 1
+            count_z[old_topic] -= 1
+        
+        new_topic = sample(i, Dts, Trace, previous_stamps, Count_zh, \
                 Count_sz, count_h, count_z, alpha_zh, beta_zs, \
                 prob_topics_aux, kernel)
-        Trace[i, 3] = new_topic
+        Trace[i, Trace.shape[1] - 1] = new_topic
         
         Count_zh[new_topic, hyper] += 1
-        Count_sz[source, new_topic] += 1
-        Count_sz[dest, new_topic] += 1
         count_h[hyper] += 1
-        count_z[new_topic] += 2
+        
+        for j in xrange(1, Trace.shape[1] - 1):
+            obj = Trace[i, j]
+            Count_sz[obj, new_topic] += 1
+            count_z[new_topic] += 1
 
-def _e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
+def _e_step(Dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
         count_z, alpha_zh, beta_zs, prob_topics_aux, kernel):
     '''Wrapper used mostly for unit tests. Do not call directly otherwise'''
-    e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
+    e_step(Dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
             count_z, alpha_zh, beta_zs, prob_topics_aux, kernel)
 
-cdef inline void m_step(double[::1] dts, int[:,::1] Trace, \
+cdef inline void m_step(double[:,::1] Dts, int[:,::1] Trace, \
         StampLists previous_stamps, Kernel kernel) nogil:
     
     previous_stamps.clear()
@@ -164,8 +175,8 @@ cdef inline void m_step(double[::1] dts, int[:,::1] Trace, \
     cdef double dt
     cdef int i
     for i in xrange(Trace.shape[0]):
-        dt = dts[i]
-        topic = Trace[i, 3]
+        dt = Dts[i, Dts.shape[1] - 1]
+        topic = Trace[i, Trace.shape[1] - 1]
         previous_stamps.append(topic, dt)
     kernel.mstep(previous_stamps)
 
@@ -185,7 +196,7 @@ cdef void col_normalize(double[:,::1] X) nogil:
             else:
                 X[i, j] = 1.0 / X.shape[0]
 
-cdef void fast_em(double[::1] dts, int[:,::1] Trace, \
+cdef void fast_em(double[:,::1] Dts, int[:,::1] Trace, \
         StampLists previous_stamps, int[:,::1] Count_zh, int[:,::1] Count_sz, \
         int[::1] count_h, int[::1] count_z, double alpha_zh, double beta_zs, \
         double[::1] prob_topics_aux, double[:,::1] Theta_zh, \
@@ -193,9 +204,9 @@ cdef void fast_em(double[::1] dts, int[:,::1] Trace, \
 
     cdef int i
     for i in xrange(num_iter):
-        e_step(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
+        e_step(Dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, \
                 count_z, alpha_zh, beta_zs, prob_topics_aux, kernel)
-        m_step(dts, Trace, previous_stamps, kernel)
+        m_step(Dts, Trace, previous_stamps, kernel)
         
         #average everything out after burn_in
         if i >= burn_in:
@@ -203,11 +214,11 @@ cdef void fast_em(double[::1] dts, int[:,::1] Trace, \
                     count_h, count_z, alpha_zh, beta_zs, \
                     Theta_zh, Psi_sz)
 
-def em(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, count_z, \
+def em(Dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, count_z, \
         alpha_zh, beta_zs, prob_topics_aux, Theta_zh, Psi_sz, num_iter, \
         burn_in, kernel, average_and_normalize=True):
     
-    fast_em(dts, Trace, previous_stamps, Count_zh, Count_sz, \
+    fast_em(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, alpha_zh, beta_zs, prob_topics_aux, \
             Theta_zh, Psi_sz, num_iter, burn_in, kernel)
     if average_and_normalize:
@@ -219,20 +230,19 @@ def em(dts, Trace, previous_stamps, Count_zh, Count_sz, count_h, count_z, \
 def fast_populate(int[:,::1] Trace, int[:,::1] Count_zh, int[:,::1] Count_sz, \
         int[::1] count_h, int[::1] count_z):
     
-    cdef int i, h, s, d, z
+    cdef int i, j, h, o, z
     for i in xrange(Trace.shape[0]):
         h = Trace[i, 0]
-        s = Trace[i, 1]
-        d = Trace[i, 2]
-        z = Trace[i, 3]
+        z = Trace[i, Trace.shape[1] - 1]
 
         Count_zh[z, h] += 1
-        Count_sz[s, z] += 1
-        Count_sz[d, z] += 1
         count_h[h] += 1
-        count_z[z] += 2
+        for j in xrange(1, Trace.shape[1] - 1):
+            o = Trace[i, j]
+            Count_sz[o, z] += 1
+            count_z[z] += 1
 
-def quality_estimate(double[::1] dts, int[:,::1] Trace, \
+def quality_estimate(double[:,::1] Dts, int[:,::1] Trace, \
         StampLists previous_stamps, int[:,::1] Count_zh, int[:,::1] Count_sz, \
         int[::1] count_h, int[::1] count_z, double alpha_zh, double beta_zs, \
         double[::1] ll_per_z, int[::1] idx, Kernel kernel):
@@ -241,20 +251,21 @@ def quality_estimate(double[::1] dts, int[:,::1] Trace, \
     cdef int ns = Count_sz.shape[0]
     
     cdef int i = 0
-    cdef int h, z, s, d = 0
+    cdef int h, z, o = 0
     cdef double dt = 0
 
     for i in xrange(idx.shape[0]):
-        dt = dts[idx[i]] 
+        dt = Dts[idx[i], Dts.shape[1] - 1] 
         h = Trace[idx[i], 0]
-        s = Trace[idx[i], 1]
-        d = Trace[idx[i], 2]
-        z = Trace[idx[i], 3]
+        z = Trace[idx[i], Trace.shape[1] - 1]
+        
+        for j in xrange(1, Trace.shape[1] - 1):
+            o = Trace[i, j]
+            ll_per_z[z] += \
+                log(dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs))
 
         ll_per_z[z] += \
                 log(dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
-                log(dir_posterior(Count_sz[s, z], count_z[z], ns, beta_zs)) + \
-                log(dir_posterior(Count_sz[d, z], count_z[z], ns, beta_zs)) + \
                 log(kernel.pdf(dt, z, previous_stamps))
 
 def reciprocal_rank(double[::1] tstamps, int[:, ::1] HOs, \
@@ -276,9 +287,10 @@ def reciprocal_rank(double[::1] tstamps, int[:, ::1] HOs, \
     cdef double[:, ::1] rrs = np.zeros(shape=(HOs.shape[0], 3), dtype='d')
     cdef int i = 0
     for i in xrange(HOs.shape[0]):
-        dt = tstamps[i + 1] - tstamps[i]
+        dt = tstamps[i] 
         h = HOs[i, 0]
-        real_o = HOs[i, 1]
+        s = HOs[i, 1]
+        real_o = HOs[i, 2]
         
         for candidate_o in prange(Psi_sz.shape[0], schedule='static', nogil=True):
             aux_base[candidate_o] = 0.0
