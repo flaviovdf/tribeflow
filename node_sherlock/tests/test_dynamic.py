@@ -66,6 +66,7 @@ def test_merge():
                 count_z, alpha_zh, beta_zd, ll_per_z, \
                 np.arange(Trace.shape[0], dtype='i4'), kernel)
     
+    print(ll_per_z)
     Trace_new, Count_zh_new, Count_sz_new, \
             count_z_new, new_stamps, _ = \
             dynamic.merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \

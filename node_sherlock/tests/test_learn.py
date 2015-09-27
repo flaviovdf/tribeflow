@@ -99,4 +99,3 @@ def test_em():
     assert (old_Count_sz != Count_sz).any()
     
     assert (old_count_h == count_h).all() #the count_h should not change
-    assert (old_count_z != count_z).any()

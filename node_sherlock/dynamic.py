@@ -87,9 +87,9 @@ def split(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
         argsrt = topic_stamps.argsort()
         top = int(np.ceil(perc * topic_stamps.shape[0]))
         
-        #If not at least 50, exit, not enough for a CCDF estimation
-        if top < min_stamps:
-            continue
+        #If not at least min stamps, exit, not enough for a CCDF estimation
+        #if top < min_stamps:
+        #    continue
         
         #Populate stamps
         new_stamps._clear_one(z)
@@ -164,15 +164,17 @@ def correlate_counts(Count_zh, Count_sz, count_h, count_z, \
     Psi_sz = Psi_sz / Psi_sz.sum(axis=0)
     
     #Similarity between every probability
-    C = np.cov(Theta_hz.T) + np.cov(Psi_sz.T)
-    C /= 2
+    #C = np.cov(Theta_hz.T) + np.cov(Psi_sz.T)
+    C = np.cov(Psi_sz.T)
+    #C /= 2
     
     #Remove lower diag (symmetric)
     C = np.triu(C, 1)
+    print(C)
     return C
 
 def finalize_merge(nz, to_merge, Dts, Trace, nh, ns, kernel):
-     
+    
     for z1, z2 in to_merge:
         idx = Trace[:, -1] == z2
         Trace[:, -1][idx] = z1
@@ -189,14 +191,12 @@ def finalize_merge(nz, to_merge, Dts, Trace, nh, ns, kernel):
         new_P = kernel.get_state()
 
     #Make sure new trace has contiguous ids
-    new_nz = nz - len(to_merge)
-    old_ids = sorted(set(Trace[:, -1]))
-    new_ids = range(new_nz)
-    
     new_assign = Trace[:, -1].copy()
-    for i, z in enumerate(old_ids):
-        idx = Trace[:, -1] == z
-        new_assign[idx] = new_ids[i]
+    old_assign = Trace[:, -1].copy()
+    new_nz = len(set(new_assign))
+    for i, z in enumerate(set(new_assign)):
+        idx = old_assign == z
+        new_assign[idx] = i
     Trace[:, -1] = new_assign
 
     #Populate new counts
@@ -249,7 +249,7 @@ def merge(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
         if z1 in merged or z2 in merged:
             continue
         
-        if C[z1, z2] < 0: #already at nonsimilar
+        if C[z1, z2] <= 0: #already at nonsimilar
             break
     
         Count_zh_mrg[:] = Count_zh

@@ -1,4 +1,10 @@
 #!-*- coding: utf8
+from scipy.stats import linregress
+
+import matplotlib
+matplotlib.use('Agg')
+
+from matplotlib import rc
 
 import matplotlib.pyplot as plt
 import math
@@ -8,6 +14,26 @@ import plac
 import statsmodels.api as sm
 
 C = math.pi / 180.0
+
+def initialize_matplotlib():
+
+    inches_per_pt = 1.0 / 72.27
+    fig_width = 120 * inches_per_pt  # width in inches
+    fig_height = 96 * inches_per_pt  #.4 * fig_width
+    
+    rc('axes', labelsize=6)
+    rc('axes', titlesize=6)
+    rc('axes', unicode_minus=False)
+    rc('axes', grid=False)
+    rc('figure', figsize=(fig_width, fig_height))
+    rc('grid', linestyle=':')
+    rc('font', family='serif')
+    rc('legend', fontsize=5)
+    rc('lines', linewidth=.7)
+    rc('ps', usedistiller='xpdf')
+    rc('text', usetex=True)
+    rc('xtick', labelsize=6)
+    rc('ytick', labelsize=6)
 
 def distance(s, d, lat_long_dict):
 
@@ -42,6 +68,7 @@ def distance(s, d, lat_long_dict):
     return arc
 
 def main(trace_fpath, lat_long_fpath, leaveout=0.3):
+    initialize_matplotlib()
     leaveout = float(leaveout)
     
     lat_long_dict = {}
@@ -79,11 +106,13 @@ def main(trace_fpath, lat_long_fpath, leaveout=0.3):
     answer_df_test = df_test.groupby(['s', 'd']).count()['u']
     answer_dict_test = dict(zip(answer_df_test.index, answer_df_test.values))
     
-    #This is future information, should not be exploited
-    #pop_df_test = df_test.groupby(['d']).count()['u']
-    #pop_dict_test = dict(zip(pop_df_test.index, pop_df_test.values))
+    #This is future information, should not be exploited for likelihood
+    pop_df_test = df_test.groupby(['d']).count()['u']
+    pop_dict_test = dict(zip(pop_df_test.index, pop_df_test.values))
 
-    X_test = []
+    X_test_ll = []
+    X_test_pred = []
+
     y_test = []
     for row in df_test[['s', 'd']].values:
         s, d = row
@@ -94,31 +123,52 @@ def main(trace_fpath, lat_long_fpath, leaveout=0.3):
             if dist == 0: #different ids, same loc, ignore
                 continue
             
-            X_test.append([1.0, np.log(pop_dict[s]), np.log(pop_dict[d]), \
+            X_test_ll.append([1.0, np.log(pop_dict[s]), np.log(pop_dict[d]), \
                     -np.log(dist)])
+            X_test_pred.append([1.0, np.log(pop_dict_test[s] if s in pop_dict_test else 0), \
+                    np.log(pop_dict_test[d]), -np.log(dist)])
             y_test.append(answer_dict_test[s, d])
 
     X_train = np.asarray(X)
     y_train = np.asarray(y)
 
-    X_test = np.asarray(X_test)
+    X_test_ll = np.asarray(X_test_ll)
+    X_test_pred = np.asarray(X_test_pred)
+
     y_test = np.asarray(y_test)
     
     model = sm.GLM(y_train, X_train, family=sm.families.Poisson())
     results = model.fit()
     print(results.summary()) 
-    plt.plot(np.log(results.predict()), np.log(y_train), 'wo', rasterized=True)
-    plt.xlabel('Y_pred log')
-    plt.ylabel('Y_true log')
-    plt.savefig('/tmp/bah.png')
+    
+    y_pred = np.array(results.predict(X_test_pred))
+    print(np.abs(y_test - y_pred).mean())
+    
+    plt.plot(y_pred, y_test, 'wo', rasterized=True, markersize=2)
+    plt.plot(y_pred, y_pred, 'r-', rasterized=True)
+    plt.minorticks_off()
+
+    ax = plt.gca()
+    ax.tick_params(direction='out', pad=0.3)
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+
+    plt.ylabel(r'True value ($n_{ds}$)', labelpad=0.2)
+    plt.xlabel(r'Predicted value ($\tilde{n_{ds}}$)', labelpad=0.3)
+    plt.tight_layout(pad=0.1)
+    _, _, r, _, _ = linregress(y_pred, y_test)
+    plt.title('MAE = %.3f ; R2 = %.3f ' %(np.abs(y_test - y_pred).mean(), r**2), y=0.8)
+    plt.savefig('pred.pdf')
 
     #Likelihood on test set (adapted from glm code on train set,
     #no method for test set exists)
-    lin_pred = np.dot(X_test, results.params) + model._offset_exposure
+    lin_pred = np.dot(X_test_ll, results.params) + model._offset_exposure
     expval = model.family.link.inverse(lin_pred)
     llr = model.family.loglike(expval, y_test, results.scale)
     llr = llr
-    print(llr, llr / X_test.shape[0]) 
+    print(llr, llr / X_test_ll.shape[0]) 
 
 if __name__ == '__main__':
     plac.call(main)

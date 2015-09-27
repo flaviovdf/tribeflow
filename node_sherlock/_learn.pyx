@@ -257,18 +257,18 @@ def quality_estimate(double[:,::1] Dts, int[:,::1] Trace, \
     for i in xrange(idx.shape[0]):
         dt = Dts[idx[i], Dts.shape[1] - 1] 
         h = Trace[idx[i], 0]
-        z = Trace[idx[i], Trace.shape[1] - 1]
-        
         for j in xrange(1, Trace.shape[1] - 1):
             o = Trace[i, j]
+            for z in range(nz):
+                ll_per_z[z] += \
+                    log(dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs))
+
+        for z in range(nz):
             ll_per_z[z] += \
-                log(dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs))
+                    log(dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
+                    log(kernel.pdf(dt, z, previous_stamps))
 
-        ll_per_z[z] += \
-                log(dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
-                log(kernel.pdf(dt, z, previous_stamps))
-
-def reciprocal_rank(double[::1] tstamps, int[:, ::1] HOs, \
+def reciprocal_rank(double[:, ::1] Dts, int[:, ::1] HOs, \
         StampLists previous_stamps, double[:, ::1] Theta_zh, \
         double[:, ::1] Psi_sz, int[::1] count_z, Kernel kernel):
         
@@ -277,45 +277,59 @@ def reciprocal_rank(double[::1] tstamps, int[:, ::1] HOs, \
     cdef int s = 0
     cdef int real_o = 0
     cdef int candidate_o = 0
+    cdef int last_o = 0
 
     cdef int z = 0
-
+    
+    cdef int[::1] mem = np.zeros(Dts.shape[1], dtype='i4')
+    cdef double[::1] mem_factor = np.zeros(Psi_sz.shape[1], dtype='d')
     cdef double[::1] aux_base = np.zeros(Psi_sz.shape[0], dtype='d')
     cdef double[::1] aux_delta = np.zeros(Psi_sz.shape[0], dtype='d')
     cdef double[::1] aux_full = np.zeros(Psi_sz.shape[0], dtype='d')
     
     cdef double[:, ::1] rrs = np.zeros(shape=(HOs.shape[0], 3), dtype='d')
-    cdef int i = 0
+    cdef int i, j
     for i in xrange(HOs.shape[0]):
-        dt = tstamps[i] 
+        dt = Dts[i, 0] 
         h = HOs[i, 0]
-        s = HOs[i, 1]
-        real_o = HOs[i, 2]
+        for j in xrange(mem.shape[0]):
+            mem[j] = HOs[i, 1 + j]
+        real_o = HOs[i, HOs.shape[1] - 1]
+        last_o = HOs[i, HOs.shape[1] - 2]
         
         for candidate_o in prange(Psi_sz.shape[0], schedule='static', nogil=True):
             aux_base[candidate_o] = 0.0
             aux_delta[candidate_o] = 0.0
             aux_full[candidate_o] = 0.0
+        
+        for z in xrange(Psi_sz.shape[1]):
+            mem_factor[z] = 1.0
+            for j in xrange(mem.shape[0]):
+                mem_factor[z] *= Psi_sz[mem[j], z]
+        mem_factor[z] *= 1.0 / (1 - Psi_sz[mem[mem.shape[0] - 1], z])
 
         for z in xrange(Psi_sz.shape[1]):
             for candidate_o in prange(Psi_sz.shape[0], schedule='static', nogil=True):
-                aux_base[candidate_o] += count_z[z] * Psi_sz[s, z] * \
+                aux_base[candidate_o] += count_z[z] * mem_factor[z] * \
                         Psi_sz[candidate_o, z] 
-                aux_delta[candidate_o] += count_z[z] * Psi_sz[s, z] * \
+                aux_delta[candidate_o] += count_z[z] * mem_factor[z] * \
                         Psi_sz[candidate_o, z] * \
                         kernel.pdf(dt, z, previous_stamps)
-                aux_full[candidate_o] += Psi_sz[s, z] * \
+                aux_full[candidate_o] += mem_factor[z] * \
                         Psi_sz[candidate_o, z] * Theta_zh[z, h] * \
                         kernel.pdf(dt, z, previous_stamps)
         
         for candidate_o in prange(Psi_sz.shape[0], schedule='static', nogil=True):
-            if aux_base[candidate_o] >= aux_base[real_o]:
+            if aux_base[candidate_o] >= aux_base[real_o] \
+                    and candidate_o != last_o:
                 rrs[i, 0] += 1
 
-            if aux_delta[candidate_o] >= aux_delta[real_o]:
+            if aux_delta[candidate_o] >= aux_delta[real_o] \
+                    and candidate_o != last_o:
                 rrs[i, 1] += 1
 
-            if aux_full[candidate_o] >= aux_full[real_o]:
+            if aux_full[candidate_o] >= aux_full[real_o] \
+                    and candidate_o != last_o:
                 rrs[i, 2] += 1
         
         rrs[i, 0] = 1.0 / rrs[i, 0]
