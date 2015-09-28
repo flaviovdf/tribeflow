@@ -290,7 +290,7 @@ def reciprocal_rank(double[:, ::1] Dts, int[:, ::1] HOs, \
     cdef double[:, ::1] rrs = np.zeros(shape=(HOs.shape[0], 3), dtype='d')
     cdef int i, j
     for i in xrange(HOs.shape[0]):
-        dt = Dts[i, 0] 
+        dt = Dts[i, Dts.shape[1] - 1] 
         h = HOs[i, 0]
         for j in xrange(mem.shape[0]):
             mem[j] = HOs[i, 1 + j]

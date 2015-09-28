@@ -88,8 +88,8 @@ def split(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
         top = int(np.ceil(perc * topic_stamps.shape[0]))
         
         #If not at least min stamps, exit, not enough for a CCDF estimation
-        #if top < min_stamps:
-        #    continue
+        if top < min_stamps:
+            continue
         
         #Populate stamps
         new_stamps._clear_one(z)
@@ -159,18 +159,13 @@ def correlate_counts(Count_zh, Count_sz, count_h, count_z, \
     _learn._aggregate(Count_zh, Count_sz, count_h, count_z, \
             alpha_zh, beta_zs, Theta_zh, Psi_sz)
     
-    Theta_hz = Theta_zh.T * count_z
-    Theta_hz = Theta_hz / Theta_hz.sum(axis=0)
     Psi_sz = Psi_sz / Psi_sz.sum(axis=0)
     
     #Similarity between every probability
-    #C = np.cov(Theta_hz.T) + np.cov(Psi_sz.T)
     C = np.cov(Psi_sz.T)
-    #C /= 2
     
     #Remove lower diag (symmetric)
     C = np.triu(C, 1)
-    print(C)
     return C
 
 def finalize_merge(nz, to_merge, Dts, Trace, nh, ns, kernel):
