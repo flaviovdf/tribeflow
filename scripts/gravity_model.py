@@ -137,8 +137,11 @@ def main(trace_fpath, lat_long_fpath, leaveout=0.3):
 
     y_test = np.asarray(y_test)
     
+    import time
+    print('training', time.localtime())
     model = sm.GLM(y_train, X_train, family=sm.families.Poisson())
     results = model.fit()
+    print('done', time.localtime())
     print(results.summary()) 
     
     y_pred = np.array(results.predict(X_test_pred))

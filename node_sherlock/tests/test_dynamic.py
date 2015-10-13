@@ -66,12 +66,13 @@ def test_merge():
                 count_z, alpha_zh, beta_zd, ll_per_z, \
                 np.arange(Trace.shape[0], dtype='i4'), kernel)
     
-    print(ll_per_z)
     Trace_new, Count_zh_new, Count_sz_new, \
             count_z_new, new_stamps, _ = \
             dynamic.merge(tstamps, Trace, previous_stamps, Count_zh, Count_sz, \
             count_h, count_z, alpha_zh, beta_zs, ll_per_z, kernel)
     
+    print(Trace_new)
+    print(np.array(new_stamps._get_all(0)))
     assert len(new_stamps._get_all(0)) == 10
     assert Count_zh_new.shape[0] < Count_zh.shape[0]
     assert Count_zh_new.shape[1] == Count_zh.shape[1]

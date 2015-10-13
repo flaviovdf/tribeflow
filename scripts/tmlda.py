@@ -36,6 +36,7 @@ def main(trace_fpath, leaveout=0.3):
         documents_train_right[u].append(s)
         documents_train_left[u].append(d)
         tokens_train.add(s)
+        tokens_train.add(d)
     
     for u in documents_train_right:
         documents_train_right[u] = '\t'.join(documents_train_right[u])
@@ -46,7 +47,7 @@ def main(trace_fpath, leaveout=0.3):
     X_train_counts = vectorizer.fit_transform(documents_train_right.values())
     Y_train_counts = vectorizer.transform(documents_train_left.values())
     
-    lda_model = LatentDirichletAllocation(n_topics=100, n_jobs=-1)
+    lda_model = LatentDirichletAllocation(n_topics=10, n_jobs=-1)
     lda_model.fit(X_train_counts)
     
     Theta_zh = lda_model.transform(X_train_counts).T
@@ -105,6 +106,7 @@ def main(trace_fpath, leaveout=0.3):
 
     print(ll_tmlda, ll_lda)
     print(ll_tmlda / n, ll_lda / n)
+    print(n)
 
 if __name__ == '__main__':
     plac.call(main)

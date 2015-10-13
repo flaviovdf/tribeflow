@@ -104,16 +104,18 @@ def split(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
         Trace[:, -1][idx] = new_assign
         
         #Update matrices. Can't really vectorize this :(
-        for h, s, d, _ in Trace[idx][-top:]:
+        for line in Trace[idx][-top:]:
+            h = line[0]
+
             Count_zh_spl[z, h] -= 1
-            Count_sz_spl[s, z] -= 1
-            Count_sz_spl[d, z] -= 1
-            count_z_spl[z] -= 2
+            for o in line[1:-1]:
+                Count_sz_spl[o, z] -= 1
+                count_z_spl[z] -= 1
             
             Count_zh_spl[nz, h] += 1
-            Count_sz_spl[s, nz] += 1
-            Count_sz_spl[d, nz] += 1
-            count_z_spl[nz] += 2
+            for o in line[1:-1]:
+                Count_sz_spl[o, nz] += 1
+                count_z_spl[nz] += 1
 
         #New LL
         ll_per_z_new[z] = 0
@@ -159,11 +161,14 @@ def correlate_counts(Count_zh, Count_sz, count_h, count_z, \
     _learn._aggregate(Count_zh, Count_sz, count_h, count_z, \
             alpha_zh, beta_zs, Theta_zh, Psi_sz)
     
+    Theta_hz = Theta_zh.T * count_z
+    Theta_hz = Theta_hz / Theta_hz.sum(axis=0)
     Psi_sz = Psi_sz / Psi_sz.sum(axis=0)
     
     #Similarity between every probability
-    C = np.cov(Psi_sz.T)
-    
+    C = np.cov(Theta_hz.T) + np.cov(Psi_sz.T)
+    C /= 2
+
     #Remove lower diag (symmetric)
     C = np.triu(C, 1)
     return C

@@ -4,7 +4,6 @@
 # cython: initializedcheck = False
 # cython: nonecheck = False
 # cython: wraparound = False
-
 from __future__ import division, print_function
 
 from cython.parallel cimport prange
@@ -257,16 +256,15 @@ def quality_estimate(double[:,::1] Dts, int[:,::1] Trace, \
     for i in xrange(idx.shape[0]):
         dt = Dts[idx[i], Dts.shape[1] - 1] 
         h = Trace[idx[i], 0]
+        z = Trace[idx[i], Trace.shape[1] - 1]
         for j in xrange(1, Trace.shape[1] - 1):
             o = Trace[i, j]
-            for z in range(nz):
-                ll_per_z[z] += \
-                    log(dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs))
-
-        for z in range(nz):
             ll_per_z[z] += \
-                    log(dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
-                    log(kernel.pdf(dt, z, previous_stamps))
+                log(dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs))
+
+        ll_per_z[z] += \
+                log(dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
+                log(kernel.pdf(dt, z, previous_stamps))
 
 def reciprocal_rank(double[:, ::1] Dts, int[:, ::1] HOs, \
         StampLists previous_stamps, double[:, ::1] Theta_zh, \
