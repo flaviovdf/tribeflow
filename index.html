@@ -74,6 +74,7 @@ set it up as your default enviroment.</p>
 pip install scipy
 pip install cython
 pip install pandas
+pip install mpi4py
 pip install plac</pre></div>
 
 <p>Use or package manager (<em>apt</em> on Ubuntu, <em>HomeBrew</em> on a mac) to install
@@ -97,12 +98,42 @@ the package folder using the <code>run_script.sh</code> command.</p>
 
 <p>For command line help:</p>
 
-<div class="highlight highlight-source-shell"><pre>./run_script.sh scripts/trace_converter.py -h
-./run_script.sh main.py -h</pre></div>
+<div class="highlight highlight-source-shell"><pre>$ python scripts/trace_converter.py -h
+$ python main.py -h</pre></div>
 
 <p>Running with mpi</p>
 
-<div class="highlight highlight-source-shell"><pre>mpiexec -np 4 python main.py [OPTIONS]</pre></div>
+<div class="highlight highlight-source-shell"><pre>$ mpiexec -np 4 python main.py [OPTIONS]</pre></div>
+
+<h2>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example</h2>
+
+<p>The example below is the same code used for every result in the paper. It runs
+TribeFlow with the options used in every result in the paper. Explaining the
+parameters:</p>
+
+<ul>
+<li>
+<em>-np 4</em> Number of cores for execution.</li>
+<li>
+<em>100</em> topics.</li>
+<li>
+<em>output.h5</em> model file.</li>
+<li>
+<em>--kernel eccdf</em> The kernel heuristic for inter-event time estimation. ECCDF
+ based as per described on the paper. We also have a t-student kernel.</li>
+<li>
+<em>--residency_priors 1 99</em> The priors for the inter-event time estimation.</li>
+<li>
+<em>--leaveout 0.3</em> Number of transitions to leaveout.</li>
+<li>
+<em>--num_iter 2000</em> Number of iterations.</li>
+<li>
+<em>--num_batches 20</em> Number of split/merge moves.</li>
+</ul>
+
+<div class="highlight highlight-source-shell"><pre>$ mpiexec -np 4 python main.py trace.dat 100 output.h5 --kernel eccdf
+--residency_priors 1 99 --leaveout 0.3 --num_iter 2000 --num_batches 20</pre></div>
 
 <p><a name="data"></a></p>
 
