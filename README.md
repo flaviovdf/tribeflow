@@ -69,3 +69,16 @@ Running with mpi
 ```bash
 mpiexec -np 4 python main.py [OPTIONS]
 ```
+
+Datasets
+--------
+
+To come!
+
+Competing Methods
+-----------------
+
+* [PRLME](http://github.com/flaviovdf/plme)
+* [FPMC](http://github.com/flaviovdf/fpmc)
+* [LME](http://www.cs.cornell.edu/people/tj/playlists/index.html)
+* [Gravity Model](https://github.com/flaviovdf/tribeflow/blob/master/scripts/gravity_model.py)
