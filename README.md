@@ -2,7 +2,7 @@
 TribeFlow
 =========
 
-1. [Top](#top)
+1. [Home](#top)
 2. [Datasets](#data)
 3. [Competing Methods](#competition)
 
@@ -185,3 +185,4 @@ Competing Methods
 * [FPMC](http://github.com/flaviovdf/fpmc)
 * [LME](http://www.cs.cornell.edu/people/tj/playlists/index.html)
 * [Gravity Model](https://github.com/flaviovdf/tribeflow/blob/master/scripts/gravity_model.py)
+* [TMLDA](https://github.com/flaviovdf/tribeflow/blob/master/scripts/tmlda.py)
