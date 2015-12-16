@@ -132,8 +132,9 @@ parameters:</p>
 <em>--num_batches 20</em> Number of split/merge moves.</li>
 </ul>
 
-<div class="highlight highlight-source-shell"><pre>$ mpiexec -np 4 python main.py trace.dat 100 output.h5 --kernel eccdf
---residency_priors 1 99 --leaveout 0.3 --num_iter 2000 --num_batches 20</pre></div>
+<div class="highlight highlight-source-shell"><pre>$ mpiexec -np 4 python main.py trace.dat 100 output.h5 \
+    --kernel eccdf --residency_priors 1 99 \
+    --leaveout 0.3 --num_iter 2000 --num_batches 20</pre></div>
 
 <p><a name="data"></a></p>
 
