@@ -86,7 +86,7 @@ parameters:
    * *-np 4* Number of cores for execution.
    * *100* topics.
    * *output.h5* model file.
-   * *--kernel eccdf* The kernel heuristic for inter-event time estimation. ECCDF.
+   * *--kernel eccdf* The kernel heuristic for inter-event time estimation. ECCDF
      based as per described on the paper. We also have a t-student kernel.
    * *--residency_priors 1 99* The priors for the inter-event time estimation.
    * *--leaveout 0.3* Number of transitions to leaveout.
