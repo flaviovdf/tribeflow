@@ -38,6 +38,7 @@ pip install numpy
 pip install scipy
 pip install cython
 pip install pandas
+pip install mpi4py
 pip install plac
 ```
 
@@ -65,14 +66,36 @@ the package folder using the `run_script.sh` command.
 For command line help:
 
 ```bash
-./run_script.sh scripts/trace_converter.py -h
-./run_script.sh main.py -h
+$ python scripts/trace_converter.py -h
+$ python main.py -h
 ```
 
 Running with mpi
 
 ```bash
-mpiexec -np 4 python main.py [OPTIONS]
+$ mpiexec -np 4 python main.py [OPTIONS]
+```
+
+Example
+-------
+
+The example below is the same code used for every result in the paper. It runs
+TribeFlow with the options used in every result in the paper. Explaining the
+parameters:
+
+   * *-np 4* Number of cores for execution.
+   * *100* topics.
+   * *output.h5* model file.
+   * *--kernel eccdf* The kernel heuristic for inter-event time estimation. ECCDF.
+     based as per described on the paper. We also have a t-student kernel.
+   * *--residency_priors 1 99* The priors for the inter-event time estimation.
+   * *--leaveout 0.3* Number of transitions to leaveout.
+   * *--num_iter 2000* Number of iterations.
+   * *--num_batches 20* Number of split/merge moves.
+
+```bash
+$ mpiexec -np 4 python main.py trace.dat 100 output.h5 --kernel eccdf
+--residency_priors 1 99 --leaveout 0.3 --num_iter 2000 --num_batches 20
 ```
 
 <a name="data"></a>
