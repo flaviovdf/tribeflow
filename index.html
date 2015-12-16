@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Tribeflow by flaviovdf</title>
+    <title>TribeFlow by flaviovdf</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
@@ -15,7 +15,7 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>Tribeflow</h1>
+        <h1>TribeFlow</h1>
         <p>TribeFlow source code</p>
 
         <p class="view"><a href="https://github.com/flaviovdf/tribeflow">View the Project on GitHub <small>flaviovdf/tribeflow</small></a></p>
@@ -36,7 +36,10 @@
 <h2>
 <a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependencies</h2>
 
+<p>The python dependencies are:</p>
+
 <ul>
+<li>Mpi4Py</li>
 <li>numpy</li>
 <li>scipy</li>
 <li>cython</li>
@@ -44,18 +47,37 @@
 <li>plac</li>
 </ul>
 
+<p>You will also need to install and setup: </p>
+
+<ul>
+<li>OpenMP</li>
+<li>MPI</li>
+</ul>
+
 <h2>
 <a id="how-to-install-dependencies" class="anchor" href="#how-to-install-dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to install dependencies</h2>
 
-<p><em>Easy way:</em> Install anaconda python and set it up as your default enviroment</p>
+<p><em>Easy way:</em> Install <a href="https://www.continuum.io/">Anaconda Python</a> and 
+set it up as your default enviroment.</p>
 
-<p><em>Hard way:</em> Use pip or your package manager to install the dependencies.</p>
+<p><em>Hard way:</em> Use pip or your package manager to install the dependencies. </p>
 
 <div class="highlight highlight-source-shell"><pre>pip install numpy
 pip install scipy
 pip install cython
 pip install pandas
 pip install plac</pre></div>
+
+<p>Use or package manager (<em>apt</em> on Ubuntu, <em>HomeBrew</em> on a mac) to install
+OpenMP and MPI. These are the managers I tested with. Should work on any
+other environment.</p>
+
+<h2>
+<a id="how-to-compile" class="anchor" href="#how-to-compile" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to compile</h2>
+
+<p>Simply type <code>make</code></p>
+
+<div class="highlight highlight-source-shell"><pre>make</pre></div>
 
 <h2>
 <a id="how-to-use" class="anchor" href="#how-to-use" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to use</h2>
@@ -65,10 +87,29 @@ the package folder using the <code>run_script.sh</code> command.</p>
 
 <p><em>How to parse datasets:</em> Use the <code>scripts/trace_converter.py</code> script. It has a help.</p>
 
-<p>Example (for command line help):</p>
+<p>For command line help:</p>
 
 <div class="highlight highlight-source-shell"><pre>./run_script.sh scripts/trace_converter.py -h
 ./run_script.sh main.py -h</pre></div>
+
+<p>Running with mpi</p>
+
+<div class="highlight highlight-source-shell"><pre>mpiexec -np 4 python main.py [OPTIONS]</pre></div>
+
+<h2>
+<a id="datasets" class="anchor" href="#datasets" aria-hidden="true"><span class="octicon octicon-link"></span></a>Datasets</h2>
+
+<p>To come!</p>
+
+<h2>
+<a id="competing-methods" class="anchor" href="#competing-methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Competing Methods</h2>
+
+<ul>
+<li><a href="http://github.com/flaviovdf/plme">PRLME</a></li>
+<li><a href="http://github.com/flaviovdf/fpmc">FPMC</a></li>
+<li><a href="http://www.cs.cornell.edu/people/tj/playlists/index.html">LME</a></li>
+<li><a href="https://github.com/flaviovdf/tribeflow/blob/master/scripts/gravity_model.py">Gravity Model</a></li>
+</ul>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/flaviovdf">flaviovdf</a></p>
