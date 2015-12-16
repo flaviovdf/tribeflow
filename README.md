@@ -1,5 +1,10 @@
+<a name="top"></a>
 TribeFlow
 =========
+
+1. [Top](#top)
+2. [Datasets](#data)
+3. [Competing Methods](#competition)
 
 Contains the TribeFlow (previously node-sherlock) source code.
 
@@ -70,13 +75,15 @@ Running with mpi
 mpiexec -np 4 python main.py [OPTIONS]
 ```
 
+<a name="data"></a>
 Datasets
---------
+========
 
 To come!
 
+<a name="competition"></a>
 Competing Methods
------------------
+=================
 
 * [PRLME](http://github.com/flaviovdf/plme)
 * [FPMC](http://github.com/flaviovdf/fpmc)
