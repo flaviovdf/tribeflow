@@ -79,6 +79,69 @@ $ mpiexec -np 4 python main.py [OPTIONS]
 Example
 -------
 
+Let's we have a trace like the Last.FM trace from [Oscar
+Celma](http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/lastfm-1K.html).
+In this example, each line is of the form:
+
+```bash
+userid \t timestamp \t musicbrainz-artist-id \t artist-name \t
+musicbrainz-track-id \t track-name
+```
+
+For instance:
+
+```bash
+user_000001 2009-05-01T09:17:36Z    c74ee320-1daa-43e6-89ee-f71070ee9e8f
+Impossible Beings   952f360d-d678-40b2-8a64-18b4fa4c5f8Dois Pólos
+```
+
+First, we want to convert this file to our input format. We do this with the
+`scripts/trace_converter.py` script. Let's have a look at the options from
+this script:
+
+```bash
+$ python scripts/trace_converter.py -h
+usage: trace_converter.py [-h] [-d DELIMITER] [-l LOOPS] [-r SORT] [-f FMT]
+                          [-s SCALE] [-k SKIP_HEADER] [-m MEM_SIZE]
+                          original_trace tstamp_column hypernode_column
+                          obj_node_column
+
+positional arguments:
+  original_trace        The name of the original trace
+  tstamp_column         The column of the time stamp
+  hypernode_column      The column of the time hypernode
+  obj_node_column       The column of the object node
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d DELIMITER, --delimiter DELIMITER
+                        The delimiter
+  -l LOOPS, --loops LOOPS
+                        Consider loops
+  -r SORT, --sort SORT  Sort the trace
+  -f FMT, --fmt FMT     The format of the date in the trace
+  -s SCALE, --scale SCALE
+                        Scale the time by this value
+  -k SKIP_HEADER, --skip_header SKIP_HEADER
+                        Skip these first k lines
+  -m MEM_SIZE, --mem_size MEM_SIZE
+                        Memory Size (the markov order is m - 1)
+```
+
+The positional arguments are:
+
+   * *original_trace* is the input file
+   * *hypernode_column* represents the users (called hypernodes since it can 
+     be playlists as well)
+   * *tstamp_column* the column of the time stamp
+   * *obj_node_column* the objects of interest
+
+We can convert the file with the following line:
+
+```bash
+python scripts/trace_converter.py scripts/test_parser.dat 1 0 2 -d$'\t' -f'%Y-%m-%dT%H:%M:%SZ'
+```
+
 The example below is the same code used for every result in the paper. It runs
 TribeFlow with the options used in every result in the paper. Explaining the
 parameters:
