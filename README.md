@@ -79,6 +79,8 @@ $ mpiexec -np 4 python main.py [OPTIONS]
 Example
 -------
 
+**Converting the Trace**
+
 Let's we have a trace like the Last.FM trace from [Oscar
 Celma](http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/lastfm-1K.html).
 In this example, each line is of the form:
@@ -128,7 +130,7 @@ optional arguments:
                         Memory Size (the markov order is m - 1)
 ```
 
-The positional arguments are:
+The positional (obrigatory) arguments are:
 
    * *original_trace* is the input file
    * *hypernode_column* represents the users (called hypernodes since it can 
@@ -139,8 +141,15 @@ The positional arguments are:
 We can convert the file with the following line:
 
 ```bash
-python scripts/trace_converter.py scripts/test_parser.dat 1 0 2 -d$'\t' -f'%Y-%m-%dT%H:%M:%SZ'
+python scripts/trace_converter.py scripts/test_parser.dat 1 0 2 -d$'\t' \
+        -f'%Y-%m-%dT%H:%M:%SZ' > trace.dat
 ```
+
+Here, we are saying that column 1 are the timestamps, 0 is the user, and 2 are the
+objects (artist ids). The delimiter *-d* is a tab. The time stamp format is
+`'%Y-%m-%dT%H:%M:%SZ'`.
+
+**Learning the Model**
 
 The example below is the same code used for every result in the paper. It runs
 TribeFlow with the options used in every result in the paper. Explaining the
