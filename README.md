@@ -94,8 +94,9 @@ parameters:
    * *--num_batches 20* Number of split/merge moves.
 
 ```bash
-$ mpiexec -np 4 python main.py trace.dat 100 output.h5 --kernel eccdf
---residency_priors 1 99 --leaveout 0.3 --num_iter 2000 --num_batches 20
+$ mpiexec -np 4 python main.py trace.dat 100 output.h5 \
+    --kernel eccdf --residency_priors 1 99 \
+    --leaveout 0.3 --num_iter 2000 --num_batches 20
 ```
 
 <a name="data"></a>
