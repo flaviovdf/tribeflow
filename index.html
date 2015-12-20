@@ -202,7 +202,9 @@ parameters:</p>
 <em>--num_batches 20</em> Number of split/merge moves.</li>
 </ul>
 
-<div class="highlight highlight-source-shell"><pre>$ mpiexec -np 4 python main.py trace.dat 100 output.h5 \
+<p><em>The example below uses 20 cores</em></p>
+
+<div class="highlight highlight-source-shell"><pre>$ mpiexec -np 20 python main.py trace.dat 100 output.h5 \
     --kernel eccdf --residency_priors 1 99 \
     --leaveout 0.3 --num_iter 2000 --num_batches 20</pre></div>
 
@@ -211,7 +213,38 @@ parameters:</p>
 <h1>
 <a id="datasets" class="anchor" href="#datasets" aria-hidden="true"><span class="octicon octicon-link"></span></a>Datasets</h1>
 
-<p>To come!</p>
+<p>Below we have the list of datasets explored on the paper. We also curated links
+to various other timestamp datasets that can be exploited by TribeFlow and 
+future efforts.</p>
+
+<p>Datasets used on the paper:</p>
+
+<ol>
+<li><a href="https://archive.org/details/201309_foursquare_dataset_umn">LastFM-1k</a></li>
+<li>
+<em>LastFM-Our</em> Drop me an e-mail for now, looking for a place to upload it.</li>
+<li>
+<a href="https://archive.org/details/201309_foursquare_dataset_umn">FourSQ</a>
+This dataset was removed from the original website. Still available on
+archive. Other, more recent, FourSQ datasets are available. See below.</li>
+<li><a href="https://snap.stanford.edu/data/loc-brightkite.html">Brightkite</a></li>
+<li><a href="http://www.cs.cornell.edu/people/tj/playlists/index.html">Yes</a></li>
+</ol>
+
+<p>List of other, some more recent, datasets that can be explored by TribeFlow.</p>
+
+<ol>
+<li><a href="https://sites.google.com/site/yangdingqi/home/foursquare-dataset">Newer FourSQ</a></li>
+<li><a href="http://www.cp.jku.at/datasets/MMTD/">Million Music Tweet</a></li>
+<li><a href="https://github.com/sidooms/MovieTweetings">Movie Ratings</a></li>
+<li><a href="https://snap.stanford.edu/data/twitter7.html">Twitter</a></li>
+<li><a href="https://snap.stanford.edu/data/loc-gowalla.html">Gowalla</a></li>
+<li><a href="https://www.yelp.com/dataset_challenge">Yelp</a></li>
+<li><a href="https://www.kaggle.com/c/acm-sf-chapter-hackathon-big/data">Best Buy</a></li>
+</ol>
+
+<p>Basically, anything with users (playlists, actors, etc also work), objects and 
+timestamps.</p>
 
 <p><a name="competition"></a></p>
 
