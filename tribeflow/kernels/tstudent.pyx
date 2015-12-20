@@ -7,8 +7,8 @@
 
 from __future__ import print_function, division
 
-from node_sherlock.mycollections.stamp_lists cimport StampLists
-from node_sherlock.kernels.base cimport Kernel
+from tribeflow.mycollections.stamp_lists cimport StampLists
+from tribeflow.kernels.base cimport Kernel
 
 import numpy as np
 

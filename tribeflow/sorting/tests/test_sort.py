@@ -1,7 +1,7 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from node_sherlock.sorting.introsort import _sort
+from tribeflow.sorting.introsort import _sort
 
 from numpy.testing import assert_equal
 from numpy.testing import assert_array_equal

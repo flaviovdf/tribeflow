@@ -1,7 +1,7 @@
 #-*- coding: utf8
 '''
 This module contains the distributed learning approach we employ
-on node_sherlock. Through the use of MPI, parallelization can be performed
+on tribeflow. Through the use of MPI, parallelization can be performed
 on multiple machines.
 '''
 from __future__ import division, print_function
@@ -11,15 +11,16 @@ from _learn import em
 from _learn import fast_populate
 
 from collections import OrderedDict
+
 from enum import Enum
 
 from learn import prepare_results
 
-from node_sherlock import dataio
-from node_sherlock import kernels
-from node_sherlock.mycollections.stamp_lists import StampLists
-
 from mpi4py import MPI
+
+from tribeflow import dataio
+from tribeflow import kernels
+from tribeflow.mycollections.stamp_lists import StampLists
 
 import cProfile
 import numpy as np

@@ -1,12 +1,12 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from node_sherlock.mycollections.stamp_lists import StampLists
-from node_sherlock.kernels import ECCDFKernel
+from tribeflow.kernels import ECCDFKernel
+from tribeflow.mycollections.stamp_lists import StampLists
 from numpy.testing import assert_array_equal
 
 import numpy as np
-import node_sherlock
+import tribeflow
 
 def test_all():
     

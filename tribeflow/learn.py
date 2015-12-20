@@ -1,9 +1,10 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from node_sherlock import dataio
-
 from _learn import em
+
+from tribeflow import dataio
+
 from collections import OrderedDict
 
 import numpy as np

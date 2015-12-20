@@ -8,11 +8,10 @@ from __future__ import division, print_function
 
 from cython.parallel cimport prange
 
-from node_sherlock.mycollections.stamp_lists cimport StampLists
-from node_sherlock.myrandom.random cimport rand
-from node_sherlock.sorting.binsearch cimport bsp
-
-from node_sherlock.kernels.base cimport Kernel
+from tribeflow.kernels.base cimport Kernel
+from tribeflow.mycollections.stamp_lists cimport StampLists
+from tribeflow.myrandom.random cimport rand
+from tribeflow.sorting.binsearch cimport bsp
 
 import numpy as np
 

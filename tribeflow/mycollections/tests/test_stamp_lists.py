@@ -4,7 +4,7 @@ Unit tests for the main sherlock model.
 '''
 from __future__ import division, print_function
 
-from node_sherlock.mycollections import stamp_lists
+from tribeflow.mycollections import stamp_lists
 
 from numpy.testing import assert_equal
 from numpy.testing import assert_array_equal

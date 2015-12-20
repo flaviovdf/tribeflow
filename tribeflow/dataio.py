@@ -1,7 +1,7 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from node_sherlock.mycollections.stamp_lists import StampLists
+from tribeflow.mycollections.stamp_lists import StampLists
 
 from collections import defaultdict
 from collections import OrderedDict

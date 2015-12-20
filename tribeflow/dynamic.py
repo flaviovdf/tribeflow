@@ -1,18 +1,17 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from node_sherlock import dataio
-from node_sherlock.mycollections.stamp_lists import StampLists
-
-from node_sherlock.learn import prepare_results 
-
 from mpi4py import MPI
 
-from node_sherlock.plearn import dispatch_jobs
-from node_sherlock.plearn import fetch_results
-from node_sherlock.plearn import generate_workload
-from node_sherlock.plearn import manage
-from node_sherlock.plearn import Msg
+from tribeflow import dataio
+from tribeflow.mycollections.stamp_lists import StampLists
+from tribeflow.learn import prepare_results 
+
+from tribeflow.plearn import dispatch_jobs
+from tribeflow.plearn import fetch_results
+from tribeflow.plearn import generate_workload
+from tribeflow.plearn import manage
+from tribeflow.plearn import Msg
 
 import _learn
 import numpy as np

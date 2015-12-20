@@ -6,6 +6,7 @@ from __future__ import division, print_function
 import glob
 import numpy
 import os
+import platform
 import sys
 
 from distutils.core import setup
@@ -15,9 +16,9 @@ from Cython.Distutils import build_ext
 SOURCE = '.'
 os.chdir(SOURCE)
 
-#Uncomment on mac envs for openmp
-os.environ["CC"] = "gcc-5"
-os.environ["CXX"] = "gcc-5"
+if platform.system() == 'Darwin':
+    os.environ["CC"] = "gcc-5"
+    os.environ["CXX"] = "gcc-5"
 
 if sys.version_info[:2] < (2, 7):
     print('Requires Python version 2.7 or later (%d.%d detected).' %
@@ -27,7 +28,7 @@ if sys.version_info[:2] < (2, 7):
 def get_packages():
     '''Appends all packages (based on recursive sub dirs)'''
 
-    packages  = ['node_sherlock']
+    packages  = ['tribeflow']
 
     for package in packages:
         base = os.path.join(package, '**/')
@@ -54,7 +55,7 @@ def get_extensions():
     for pkg in packages:
         pkg_folder = pkg.replace('.', '/')
         pyx_files = glob.glob(os.path.join(pkg_folder, '*.pyx'))
-        include_dirs = ['node_sherlock/myrandom/', numpy.get_include()]
+        include_dirs = ['tribeflow/myrandom/', numpy.get_include()]
         for pyx in pyx_files:
             pxd = pyx.replace('pyx', 'pxd')
             module = pyx.replace('.pyx', '').replace('/', '.')
@@ -64,7 +65,7 @@ def get_extensions():
             else:
                 ext_files = [pyx]
             
-            if module == 'node_sherlock.myrandom.random':
+            if module == 'tribeflow.myrandom.random':
                 ext_files.append(os.path.join(pkg_folder, 'randomkit.c'))
             
             extension = Extension(module, ext_files,
@@ -81,6 +82,6 @@ if __name__ == "__main__":
     packages = get_packages()
     extensions = get_extensions()
     setup(cmdclass = {'build_ext': build_ext},
-            name             = 'node_sherlock',
+            name             = 'tribeflow',
             packages         = packages,
             ext_modules      = extensions)

@@ -4,14 +4,14 @@ Unit tests for the dynamic learning model.
 '''
 from __future__ import division, print_function
 
-from node_sherlock import dataio
-from node_sherlock import dynamic
-from node_sherlock.tests import files
+from tribeflow import dataio
+from tribeflow import dynamic
+from tribeflow.tests import files
 
-from node_sherlock.kernels import ECCDFKernel
+from tribeflow.kernels import ECCDFKernel
 
-from node_sherlock._learn import quality_estimate
-from node_sherlock._learn import fast_populate
+from tribeflow._learn import quality_estimate
+from tribeflow._learn import fast_populate
 
 from numpy.testing import assert_equal
 from numpy.testing import assert_almost_equal

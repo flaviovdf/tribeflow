@@ -165,8 +165,9 @@ parameters:
    * *--num_iter 2000* Number of iterations.
    * *--num_batches 20* Number of split/merge moves.
 
+*The example below uses 20 cores*
 ```bash
-$ mpiexec -np 4 python main.py trace.dat 100 output.h5 \
+$ mpiexec -np 20 python main.py trace.dat 100 output.h5 \
     --kernel eccdf --residency_priors 1 99 \
     --leaveout 0.3 --num_iter 2000 --num_batches 20
 ```
@@ -175,14 +176,39 @@ $ mpiexec -np 4 python main.py trace.dat 100 output.h5 \
 Datasets
 ========
 
-To come!
+Below we have the list of datasets explored on the paper. We also curated links
+to various other timestamp datasets that can be exploited by TribeFlow and 
+future efforts.
+
+Datasets used on the paper:
+
+    1. [LastFM-1k](https://archive.org/details/201309_foursquare_dataset_umn)
+    2. *LastFM-Our* Drop me an e-mail for now, looking for a place to upload it.
+    3. [FourSQ](https://archive.org/details/201309_foursquare_dataset_umn)
+        This dataset was removed from the original website. Still available on
+        archive. Other, more recent, FourSQ datasets are available. See below.
+    4. [Brightkite](https://snap.stanford.edu/data/loc-brightkite.html)
+    6. [Yes](http://www.cs.cornell.edu/people/tj/playlists/index.html)
+
+List of other, some more recent, datasets that can be explored by TribeFlow.
+
+    1. [Newer FourSQ](https://sites.google.com/site/yangdingqi/home/foursquare-dataset)
+    2. [Million Music Tweet](http://www.cp.jku.at/datasets/MMTD/)
+    3. [Movie Ratings](https://github.com/sidooms/MovieTweetings)
+    4. [Twitter](https://snap.stanford.edu/data/twitter7.html)
+    5. [Gowalla](https://snap.stanford.edu/data/loc-gowalla.html)
+    6. [Yelp](https://www.yelp.com/dataset_challenge)
+    7. [Best Buy](https://www.kaggle.com/c/acm-sf-chapter-hackathon-big/data)
+
+Basically, anything with users (playlists, actors, etc also work), objects and 
+timestamps.
 
 <a name="competition"></a>
 Competing Methods
 =================
 
-* [PRLME](http://github.com/flaviovdf/plme)
-* [FPMC](http://github.com/flaviovdf/fpmc)
-* [LME](http://www.cs.cornell.edu/people/tj/playlists/index.html)
-* [Gravity Model](https://github.com/flaviovdf/tribeflow/blob/master/scripts/gravity_model.py)
-* [TMLDA](https://github.com/flaviovdf/tribeflow/blob/master/scripts/tmlda.py)
+    * [PRLME](http://github.com/flaviovdf/plme)
+    * [FPMC](http://github.com/flaviovdf/fpmc)
+    * [LME](http://www.cs.cornell.edu/people/tj/playlists/index.html)
+    * [Gravity Model](https://github.com/flaviovdf/tribeflow/blob/master/scripts/gravity_model.py)
+    * [TMLDA](https://github.com/flaviovdf/tribeflow/blob/master/scripts/tmlda.py)

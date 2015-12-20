@@ -1,7 +1,7 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from node_sherlock.sorting.binsearch import _bsp
+from tribeflow.sorting.binsearch import _bsp
 
 import numpy as np
 

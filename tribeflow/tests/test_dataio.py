@@ -4,12 +4,12 @@ Unit tests for the main sherlock model.
 '''
 from __future__ import division, print_function
 
-from node_sherlock.tests import files
+from tribeflow.tests import files
 
 from numpy.testing import assert_equal
 from numpy.testing import assert_array_equal
 
-from node_sherlock import dataio
+from tribeflow import dataio
 
 def test_initialize():
     tstamps, Trace, previous_stamps, Count_zh, Count_oz, count_h, count_z, \

@@ -1,9 +1,10 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from node_sherlock import _learn
-from node_sherlock.mycollections.stamp_lists import StampLists
-import node_sherlock
+from tribeflow import _learn
+from tribeflow.mycollections.stamp_lists import StampLists
+
+import tribeflow
 import pandas as pd
 import plac
 import numpy as np

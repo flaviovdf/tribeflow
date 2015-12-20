@@ -7,14 +7,14 @@
 
 from __future__ import division, print_function
 
+from cython cimport view
+import numpy as np
+
 cdef extern from 'stdio.h':
     cdef void abort() nogil
     cdef void *malloc(size_t) nogil
     cdef void *realloc(void *, size_t) nogil
     cdef void free(void *) nogil
-
-from cython cimport view
-import numpy as np
 
 cdef class StampLists:
     

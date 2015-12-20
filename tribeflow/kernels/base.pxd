@@ -7,7 +7,7 @@
 
 from __future__ import print_function, division
 
-from node_sherlock.mycollections.stamp_lists cimport StampLists
+from tribeflow.mycollections.stamp_lists cimport StampLists
 
 cdef class Kernel:
     

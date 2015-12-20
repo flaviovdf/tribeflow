@@ -7,12 +7,12 @@
 
 from __future__ import print_function, division
 
-from node_sherlock.mycollections.stamp_lists cimport StampLists
+from tribeflow.mycollections.stamp_lists cimport StampLists
 
-from node_sherlock.kernels.base cimport Kernel
+from tribeflow.kernels.base cimport Kernel
 
-from node_sherlock.sorting.binsearch cimport bsp
-from node_sherlock.sorting.introsort cimport sort
+from tribeflow.sorting.binsearch cimport bsp
+from tribeflow.sorting.introsort cimport sort
 
 import numpy as np
 

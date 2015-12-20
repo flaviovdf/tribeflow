@@ -1,11 +1,11 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from node_sherlock import dataio
-from node_sherlock import dynamic
-from node_sherlock import learn
-from node_sherlock import kernels
-from node_sherlock import plearn
+from tribeflow import dataio
+from tribeflow import dynamic
+from tribeflow import learn
+from tribeflow import kernels
+from tribeflow import plearn
 
 from mpi4py import MPI
 

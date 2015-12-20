@@ -4,11 +4,11 @@ Unit tests for the main sherlock model.
 '''
 from __future__ import division, print_function
 
-from node_sherlock import dataio
-from node_sherlock import learn
+from tribeflow import dataio
+from tribeflow import learn
 
-from node_sherlock.tests import files
-from node_sherlock.kernels import NoopKernel
+from tribeflow.tests import files
+from tribeflow.kernels import NoopKernel
 
 from numpy.testing import assert_equal
 from numpy.testing import assert_almost_equal
