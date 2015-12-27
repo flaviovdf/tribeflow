@@ -182,13 +182,13 @@ future efforts.
 
 Datasets used on the paper:
 
-1. [LastFM-1k](https://archive.org/details/201309_foursquare_dataset_umn)
+1. [LastFM-1k](http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/lastfm-1K.html)
 2. *LastFM-Our* Drop me an e-mail for now, looking for a place to upload it.
 3. [FourSQ](https://archive.org/details/201309_foursquare_dataset_umn)
     This dataset was removed from the original website. Still available on
     archive. Other, more recent, FourSQ datasets are available. See below.
 4. [Brightkite](https://snap.stanford.edu/data/loc-brightkite.html)
-6. [Yes](http://www.cs.cornell.edu/people/tj/playlists/index.html)
+5. [Yes](http://www.cs.cornell.edu/people/tj/playlists/index.html)
 
 List of other, some more recent, datasets that can be explored by TribeFlow.
 
