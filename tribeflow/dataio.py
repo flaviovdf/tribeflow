@@ -1,4 +1,8 @@
 #-*- coding: utf8
+'''
+The dataio module is responsible for loading input files and saving
+models to the disk as pandas frames.
+'''
 from __future__ import division, print_function
 
 from tribeflow.mycollections.stamp_lists import StampLists
@@ -10,6 +14,22 @@ import numpy as np
 import pandas as pd
 
 def save_model(out_fpath, model):
+    '''
+    Saves the given model to out_fpath. The model is simply a map of string
+    keys, numpy array or dict values. Nothing else is supported.
+
+    key -> array
+    key -> dict
+
+    Only.
+
+    Parameters
+    ----------
+    out_fpath : string
+        Where to save the model
+    model : dict
+        The actual model
+    '''
     store = pd.HDFStore(out_fpath, 'w')
     for model_key in model:
         model_val = model[model_key]
@@ -23,7 +43,35 @@ def save_model(out_fpath, model):
 
 def initialize_trace(trace_fpath, num_topics, num_iter, \
         from_=0, to=np.inf, initial_assign=None):
+    '''
+    Given a trace (user trajectories) to learn from, this method will 
+    initialize the necessary matrices and dicts to learn tribeflow.
     
+    Using from_, to_ the trace can be sliced. initial_assign is useful to 
+    pickup learning from a previous model.
+
+    Parameters
+    ----------
+    trace_fpath : string
+        The location of the trace
+
+    num_topics : int
+        The number of latent spaces
+
+    from_ : int
+        Where to begin reading the trace from. 0 is the first line.
+
+    to : int
+        We will stop reading the file here
+
+    initial_assign : array-like
+        Initial topic assignments.
+
+    Returns
+    -------
+
+    Count matrices and dicts used to learn tribeflow.
+    '''
     count_zh_dict = defaultdict(int)
     count_oz_dict = defaultdict(int)
     count_z_dict = defaultdict(int)

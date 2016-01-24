@@ -1,4 +1,6 @@
 #-*- coding: utf8
+'''Main code. Entry point for tribeflow from the command line. Just run python
+main.py and check out the docs'''
 from __future__ import division, print_function
 
 from tribeflow import dataio

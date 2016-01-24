@@ -90,7 +90,6 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
     Returns
     -------
     
-    TODO: explain this better. For the time being, see the keys of the dict.
     A dictionary with the results.
     '''
     Dts, Trace, previous_stamps, Count_zh, Count_sz, \
