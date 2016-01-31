@@ -76,12 +76,18 @@ Running with mpi
 $ mpiexec -np 4 python main.py [OPTIONS]
 ```
 
+Running TribeFlow from other python code:
+
+```
+Check the api_singlecore_example.py file
+```
+
 Example
 -------
 
 **Converting the Trace**
 
-Let's we have a trace like the Last.FM trace from [Oscar
+Let's assume we have a trace like the Last.FM trace from [Oscar
 Celma](http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/lastfm-1K.html).
 In this example, each line is of the form:
 
@@ -149,13 +155,22 @@ Here, we are saying that column 1 are the timestamps, 0 is the user, and 2 are t
 objects (artist ids). The delimiter *-d* is a tab. The time stamp format is
 `'%Y-%m-%dT%H:%M:%SZ'`.
 
+***Adding memory***
+
+Use the -m argument to increase the burst (B parameter in the paper) size. 
+
+```bash
+python scripts/trace_converter.py scripts/test_parser.dat 1 0 2 -d$'\t' \
+        -f'%Y-%m-%dT%H:%M:%SZ' -m 3 > trace.dat
+```
+
 **Learning the Model**
 
 The example below is the same code used for every result in the paper. It runs
 TribeFlow with the options used in every result in the paper. Explaining the
 parameters:
 
-   * *-np 4* Number of cores for execution.
+   * *-np 20* Number of cores for execution.
    * *100* topics.
    * *output.h5* model file.
    * *--kernel eccdf* The kernel heuristic for inter-event time estimation. ECCDF
@@ -202,6 +217,9 @@ List of other, some more recent, datasets that can be explored by TribeFlow.
 
 Basically, anything with users (playlists, actors, etc also work), objects and 
 timestamps.
+
+On the `example` folder we have some sub-sampled datasets that can be used to
+better understand the method.
 
 <a name="competition"></a>
 Competing Methods
