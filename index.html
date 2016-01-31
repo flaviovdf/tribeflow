@@ -105,12 +105,17 @@ $ python main.py -h</pre></div>
 
 <div class="highlight highlight-source-shell"><pre>$ mpiexec -np 4 python main.py [OPTIONS]</pre></div>
 
+<p>Running TribeFlow from other python code:</p>
+
+<pre><code>Check the api_singlecore_example.py file
+</code></pre>
+
 <h2>
 <a id="example" class="anchor" href="#example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example</h2>
 
 <p><strong>Converting the Trace</strong></p>
 
-<p>Let's we have a trace like the Last.FM trace from <a href="http://www.dtic.upf.edu/%7Eocelma/MusicRecommendationDataset/lastfm-1K.html">Oscar
+<p>Let's assume we have a trace like the Last.FM trace from <a href="http://www.dtic.upf.edu/%7Eocelma/MusicRecommendationDataset/lastfm-1K.html">Oscar
 Celma</a>.
 In this example, each line is of the form:</p>
 
@@ -176,6 +181,13 @@ optional arguments:
 objects (artist ids). The delimiter <em>-d</em> is a tab. The time stamp format is
 <code>'%Y-%m-%dT%H:%M:%SZ'</code>.</p>
 
+<p><strong><em>Adding memory</em></strong></p>
+
+<p>Use the -m argument to increase the burst (B parameter in the paper) size. </p>
+
+<div class="highlight highlight-source-shell"><pre>python scripts/trace_converter.py scripts/test_parser.dat 1 0 2 -d<span class="pl-s"><span class="pl-pds">$'</span><span class="pl-cce">\t</span><span class="pl-pds">'</span></span> \
+        -f<span class="pl-s"><span class="pl-pds">'</span>%Y-%m-%dT%H:%M:%SZ<span class="pl-pds">'</span></span> -m 3 <span class="pl-k">&gt;</span> trace.dat</pre></div>
+
 <p><strong>Learning the Model</strong></p>
 
 <p>The example below is the same code used for every result in the paper. It runs
@@ -184,7 +196,7 @@ parameters:</p>
 
 <ul>
 <li>
-<em>-np 4</em> Number of cores for execution.</li>
+<em>-np 20</em> Number of cores for execution.</li>
 <li>
 <em>100</em> topics.</li>
 <li>
@@ -245,6 +257,9 @@ archive. Other, more recent, FourSQ datasets are available. See below.</li>
 
 <p>Basically, anything with users (playlists, actors, etc also work), objects and 
 timestamps.</p>
+
+<p>On the <code>example</code> folder we have some sub-sampled datasets that can be used to
+better understand the method.</p>
 
 <p><a name="competition"></a></p>
 
