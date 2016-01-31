@@ -30,11 +30,12 @@ dataio.save_model(out_fpath, rv)
 #Let's load the model so that we can get a feel of how to work with the pandas
 #output
 model = pd.HDFStore(out_fpath, 'r')
-Psi_sz = model["Psi_sz"].values
 
+#Let's print the top 5 objects for each env.
+Psi_sz = model["Psi_sz"].values
 id2obj = dict((v, k) for k, v in model["source2id"].values)
 
-for z in xrange(50):
+for z in xrange(nz):
     top = Psi_sz[:, z].argsort()[::-1][:5]
     
     print(z)
