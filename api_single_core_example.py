@@ -1,3 +1,7 @@
+'''
+This simple example will run TribeFlow *serially*. No MPI based code is 
+necessary.
+'''
 from __future__ import division, print_function
 
 from tribeflow import dataio
