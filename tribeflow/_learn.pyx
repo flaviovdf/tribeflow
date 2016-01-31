@@ -18,9 +18,6 @@ import numpy as np
 cdef extern from 'math.h':
     double log(double) nogil
 
-cdef extern from 'stdio.h':
-    int printf(char *, ...) nogil
-
 cdef void average(double[:,::1] Theta_zh, double[:,::1] Psi_sz, int n) nogil:
 
     cdef int nz = Theta_zh.shape[0]

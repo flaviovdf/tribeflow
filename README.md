@@ -207,8 +207,10 @@ timestamps.
 Competing Methods
 =================
 
+* [HMMs](https://github.com/guyz/HMM) - or any other implementation
 * [PRLME](http://github.com/flaviovdf/plme)
 * [FPMC](http://github.com/flaviovdf/fpmc)
 * [LME](http://www.cs.cornell.edu/people/tj/playlists/index.html)
 * [Gravity Model](https://github.com/flaviovdf/tribeflow/blob/master/scripts/gravity_model.py)
 * [TMLDA](https://github.com/flaviovdf/tribeflow/blob/master/scripts/tmlda.py)
+* [StagesModel](http://infolab.stanford.edu/~crucis/code/stages-package.zip)
