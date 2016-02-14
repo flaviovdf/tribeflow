@@ -198,7 +198,7 @@ future efforts.
 Datasets used on the paper:
 
 1. [LastFM-1k](http://www.dtic.upf.edu/~ocelma/MusicRecommendationDataset/lastfm-1K.html)
-2. *LastFM-Our* Drop me an e-mail for now, looking for a place to upload it.
+2. [LastFM-Our](https://www.dropbox.com/s/49utmj05rmv55wz/lastfm_groups.dat.gz?dl=0) 
 3. [FourSQ](https://archive.org/details/201309_foursquare_dataset_umn)
     This dataset was removed from the original website. Still available on
     archive. Other, more recent, FourSQ datasets are available. See below.
