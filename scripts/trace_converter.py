@@ -76,7 +76,8 @@ def main():
             for i in xrange(1, mem_size):
                 print(mem[i][0] - mem[i - 1][0], end='\t')
             
-            print(t_now - t_prev, end='\t')
+            #print(t_now - t_prev, end='\t')
+            print(t_now, end='\t')
             print(h_now.strip(), end='\t')
             for i in xrange(mem_size):
                 print(mem[i][1].strip(), end='\t')

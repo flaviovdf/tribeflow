@@ -116,7 +116,7 @@ def main():
                         args.num_iter, args.burn_in, from_=from_, to=to)
         else:
             dyn = args.dynamic
-            if dyn:
+            if bool(dyn):
                 num_iter = args.num_iter // args.num_batches
                 rv = dynamic.fit(args.trace_fpath, args.num_topics, alpha_zh, \
                         args.beta_zs, kernel, residency_priors, num_iter, \
