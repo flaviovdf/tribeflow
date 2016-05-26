@@ -1,0 +1,850 @@
+jazz
+
+4 : Traditional big band old. 50s, 60s
+These Users
+--
+Conte Candoli 0.780893042575
+Frank Rosolino 0.75975975976
+Bud Shank 0.748427672956
+Bill Perkins 0.714052287582
+Art Pepper 0.704590818363
+Bob Cooper 0.700374531835
+Bob Enevoldsen 0.688172043011
+Richie Kamuca 0.678936605317
+Stu Williamson 0.650793650794
+Jack Sheldon 0.645539906103
+
+Transition Through These Objects
+--
+Stan Kenton 0.118763709408
+Stan Kenton And His Orchestra 0.112193806738
+Shorty Rogers And His Giants 0.019962480802
+Shorty Rogers 0.0184463494167
+Art Pepper 0.0157510047319
+Maynard Ferguson 0.0149929390392
+Mel Tormé 0.0133925781326
+Woody Herman 0.0128029714828
+Chet Baker 0.0117922172259
+Shelly Manne & His Men 0.0117079877045
+
+
+10:
+These Users
+--
+Phil Woods 0.734068627451
+Al Cohn 0.720112517581
+Bernie Glow 0.695286195286
+Urbie Green 0.686274509804
+Frank Rehak 0.672191528545
+Nick Travis 0.666666666667
+Jimmy Cleveland 0.64870259481
+Ernie Royal 0.644808743169
+Thomas Mitchell 0.63184079602
+Eddie Bert 0.617283950617
+
+Transition Through These Objects
+--
+Jimmy Smith 0.0233859200266
+Miles Davis 0.0192163535473
+Quincy Jones 0.0189444252987
+Woody Herman 0.0166783565599
+Stan Getz 0.0164970710608
+Gerry Mulligan 0.0153187153167
+Gene Krupa 0.0144122878212
+Charles Mingus 0.013233932077
+Manny Albam 0.0130526465779
+Gil Evans 0.0123275045815
+
+
+14
+These Users
+--
+Roy Eldridge 0.712250712251
+Buck Clayton 0.709621993127
+Charlie Fowlkes 0.689727463312
+Harry Edison 0.687423687424
+Henry Coker 0.686626746507
+Frank Foster 0.641369047619
+Lester Young 0.641025641026
+Buddy Tate 0.639303482587
+Benny Powell 0.614197530864
+Thad Jones 0.613149847095
+
+Transition Through These Objects
+--
+Count Basie 0.152393175723
+Count Basie Orchestra 0.110281954936
+Billie Holiday 0.0273476212907
+Lester Young 0.0266540247131
+Coleman Hawkins 0.0231860418247
+Ella Fitzgerald 0.0227897009231
+Sarah Vaughan 0.0200153146124
+Lionel Hampton 0.0124848374834
+Frank Sinatra 0.012385752258
+Buck Clayton 0.0121875818072
+
+
+##
+27 : Stylish. Bop?
+These Users
+--
+Dizzy Gillespie 0.767676767677
+Miles Davis 0.76103500761
+J.J. Johnson 0.72440087146
+Charlie Rouse 0.707231040564
+Lucky Thompson 0.699346405229
+Charlie Parker 0.666666666667
+Sonny Rollins 0.644194756554
+Sonny Stitt 0.633838383838
+Dexter Gordon 0.626262626263
+Howard McGhee 0.617204301075
+
+Transition Through These Objects
+--
+Dizzy Gillespie 0.0871081001872
+Charlie Parker 0.0688300435269
+Miles Davis 0.0491941883718
+Thelonious Monk 0.0332139445488
+Dizzy Gillespie And His Orchestra 0.017651484878
+Clarke-Boland Big Band 0.015875902231
+Bud Powell 0.0156670101549
+Dizzy Gillespie Big Band 0.0134736433556
+Stan Getz 0.0132647512795
+Billy Eckstine And His Orchestra 0.0127425210892
+
+
+## Similar to 27. Small diff?
+29
+These Users
+--
+John Coltrane 0.792270531401
+Freddie Hubbard 0.780026990553
+Donald Byrd 0.751537515375
+Hank Mobley 0.739766081871
+Lee Morgan 0.735395189003
+Curtis Fuller 0.711594202899
+Jackie McLean 0.710437710438
+Julian Priester 0.678294573643
+Wayne Shorter 0.668154761905
+George Coleman 0.662601626016
+
+Transition Through These Objects
+--
+Art Blakey & The Jazz Messengers 0.0472545496554
+Miles Davis 0.0448591632567
+John Coltrane 0.0287447456655
+Art Blakey 0.0240628540681
+Charles Mingus 0.0224296360689
+Max Roach 0.02057865567
+Lee Morgan 0.0173122196717
+Freddie Hubbard 0.0172033384718
+Thelonious Monk 0.0170944572719
+Jimmy Smith 0.015025714473
+
+
+0
+These Users
+--
+Hubert Laws 0.714814814815
+Garnett Brown 0.570281124498
+Ron Carter 0.545614035088
+Jerry Dodgion 0.524774774775
+Wayne Andre 0.518962075848
+Ralph MacDonald 0.501165501166
+Marvin Stamm 0.478354978355
+Joe Farrell 0.478070175439
+Chuck Rainey 0.467948717949
+Jimmy Owens 0.43537414966
+
+Transition Through These Objects
+--
+George Benson 0.0241235895425
+Eumir Deodato 0.0222867773276
+Bob James 0.0213071441464
+Stanley Turrentine 0.0184906987503
+Hank Crawford 0.0177559738644
+Astrud Gilberto 0.0177559738644
+Freddie Hubbard 0.0155517992065
+Ron Carter 0.0129802621057
+Johnny Hammond 0.0122455372198
+Antonio Carlos Jobim 0.0120006289245
+
+
+11
+These Users
+--
+Paulinho Da Costa 0.698412698413
+Alex Acuña 0.594086021505
+Lenny Castro 0.510324483776
+Michael Brecker 0.498575498575
+Manolo Badrena 0.486928104575
+David Sanborn 0.440579710145
+Will Lee 0.429553264605
+Bob Mintzer 0.429429429429
+Tom Scott 0.423220973783
+Abraham Laboriel 0.419607843137
+
+Transition Through These Objects
+--
+Lee Ritenour 0.0313708537601
+Spyro Gyra 0.0153600695206
+Sadao Watanabe 0.0150997315655
+Tom Scott 0.014969562588
+Michael Franks 0.0145790556553
+Larry Carlton 0.0141885487226
+George Benson 0.0113248312164
+Yellowjackets 0.0102834793959
+Earl Klugh 0.00911195859793
+Bob James 0.00911195859793
+
+
+##
+16: Unortodox 70s?
+These Users
+--
+Don Alias 0.631111111111
+David Liebman 0.625304136253
+Dave Holland 0.506172839506
+Joe Lovano 0.504329004329
+Bob Berg 0.501529051988
+Mino Cinelu 0.487421383648
+Branford Marsalis 0.485815602837
+Kenny Garrett 0.481481481481
+Eddie Gomez 0.460481099656
+Steve Turre 0.38141025641
+
+Transition Through These Objects
+--
+Miles Davis 0.0373768050367
+Jaco Pastorius 0.00908108395511
+John Scofield 0.00829143592493
+Chick Corea 0.0081598279199
+Mike Stern 0.00763339589978
+Art Blakey & The Jazz Messengers 0.00750178789475
+Herbie Hancock 0.00737017988972
+Gil Evans 0.00737017988972
+Wynton Marsalis 0.00697535587462
+Kip Hanrahan 0.0064489238545
+
+
+21
+These Users
+--
+Conrad Gozzo 0.662100456621
+Bill Harris 0.584541062802
+Ray Linn 0.572139303483
+Flip Phillips 0.56380952381
+Chuck Gentry 0.492063492063
+Shorty Sherock 0.419607843137
+Si Zentner 0.417670682731
+Joe Howard 0.39846743295
+Tommy Pederson 0.387878787879
+Bernie Privin 0.358156028369
+
+Transition Through These Objects
+--
+Woody Herman 0.0763856759004
+Woody Herman And His Orchestra 0.0492899140316
+Gene Krupa 0.0409841779813
+Charlie Barnet And His Orchestra 0.0302275689982
+Harry James And His Orchestra 0.0294106113539
+Charlie Parker 0.0246450250956
+Gene Krupa And His Orchestra 0.0241003866661
+Benny Goodman 0.0234195886292
+Charlie Barnet 0.023011109807
+Glen Gray & The Casa Loma Orchestra 0.0193348004077
+
+
+### !! Free, improviser big bands in London
+3
+These Users
+--
+Paul Rutherford (2) 0.668949771689
+Evan Parker 0.621553884712
+John Edwards 0.556574923547
+Johannes Bauer 0.539682539683
+Paul Rogers (2) 0.53074433657
+Malcolm Griffiths 0.530158730159
+Conrad Bauer 0.496527777778
+Harry Beckett 0.456928838951
+Nick Evans 0.456928838951
+Henry Lowther 0.451851851852
+
+Transition Through These Objects
+--
+London Improvisers Orchestra 0.0196886661466
+Chris McGregor's Brotherhood Of Breath 0.0188567565342
+Globe Unity Orchestra 0.014974511676
+Barry Guy 0.0137266472573
+Mike Westbrook 0.00956709919496
+The Dedication Orchestra 0.00873518958249
+The Glasgow Improvisers Orchestra 0.00804193157211
+Spontaneous Music Ensemble 0.00776462836795
+Graham Collier Music 0.00665541555133
+Paul Dunmall 0.00665541555133
+
+
+24
+These Users
+--
+Billy Butterfield 0.597435897436
+Bud Freeman 0.593380614657
+Hymie Schertzer 0.529051987768
+Vernon Brown 0.506666666667
+Lou McGarity 0.505747126437
+Eddie Miller (2) 0.501718213058
+Max Kaminsky 0.477564102564
+Ziggy Elman 0.463768115942
+Yank Lawson 0.444444444444
+Al Klink 0.432343234323
+
+Transition Through These Objects
+--
+Benny Goodman 0.092436454067
+Benny Goodman And His Orchestra 0.0569854454565
+Tommy Dorsey And His Orchestra 0.0364765975001
+Glenn Miller And His Orchestra 0.0361836139578
+Tommy Dorsey 0.0342792209333
+Glenn Miller 0.0272476159197
+Louis Armstrong 0.0241712887262
+Artie Shaw 0.022706371015
+Artie Shaw And His Orchestra 0.0212414533038
+Jack Teagarden 0.0188975849659
+
+
+15
+These Users
+--
+Andy Martin 0.662004662005
+Wayne Bergeron 0.586894586895
+Charles Loper 0.565333333333
+Pete Christlieb 0.550595238095
+Alex Iles 0.548286604361
+Dan Higgins 0.439393939394
+Rick Baptist 0.43137254902
+Brad Dutz 0.426356589147
+Bob McChesney 0.417670682731
+Frank Szabo 0.414728682171
+
+Transition Through These Objects
+--
+The Bob Florence Limited Edition 0.0329317322226
+The Tom Kubis Big Band 0.0193897747757
+Gordon Goodwin's Big Phat Band 0.018004801855
+Paul Anka 0.0156965136538
+Wayne Bergeron 0.0153887418937
+Diane Schuur 0.0150809701335
+Toshiko Akiyoshi-Lew Tabackin Big Band 0.0141576548531
+Bill Watrous 0.014003768973
+Natalie Cole 0.0136959972128
+Chris Walden Big Band 0.012157138412
+
+
+6
+These Users
+--
+Johnny Hodges 0.793447293447
+Lawrence Brown 0.745954692557
+Harry Carney 0.741710296684
+Paul Gonsalves 0.694290976059
+Cat Anderson 0.668776371308
+Cootie Williams 0.668498168498
+Russell Procope 0.59891598916
+Juan Tizol 0.590476190476
+Harold Baker 0.572271386431
+Ray Nance 0.572271386431
+
+Transition Through These Objects
+--
+Duke Ellington 0.228356583418
+Duke Ellington And His Orchestra 0.210028627936
+Johnny Hodges 0.0392979435373
+Ella Fitzgerald 0.0292258238581
+Johnny Hodges And His Orchestra 0.0173374203023
+Lionel Hampton 0.0142002026973
+
+Louis Armstrong 0.0115583352404
+Czechoslovak Radio Jazz Orchestra 0.0099071680799
+Earl Hines 0.00924670121568
+Milan Svoboda 0.00858623435147
+
+
+## Brazilian jazz
+18
+These Users
+--
+Paulinho Braga 0.456928838951
+Sergio Barroso 0.450757575758
+Robertinho Silva 0.446886446886
+Jamil Joanes 0.444444444444
+Marcio Montarroyos 0.40329218107
+Chico Batera 0.388185654008
+Wilson Das Neves 0.364035087719
+Chacal 0.337899543379
+Novelli 0.337899543379
+Edmundo Maciel 0.328703703704
+
+Transition Through These Objects
+--
+Milton Nascimento 0.0270257420272
+Eumir Deodato 0.024022900338
+Ivan Lins 0.0188513396511
+Gilberto Gil 0.0158484979619
+Hyldon 0.015348024347
+Caetano Veloso 0.014180252579
+Ithamara Koorax 0.0133461298876
+Djavan 0.0131793053493
+João Bosco 0.0128456562727
+Edu Lobo 0.0123451826579
+
+
+## ? BIG BANDS?
+23
+These Users
+--
+Mark Turner (2) 0.491408934708
+Keith O'Quinn 0.482200647249
+David Taylor 0.432183908046
+Lew Soloff 0.42337164751
+Robert Millikan 0.414728682171
+Steve Davis (7) 0.40329218107
+Tim Hagans 0.400641025641
+Seamus Blake 0.396078431373
+Conrad Herwig 0.393939393939
+Gary Smulyan 0.391472868217
+
+Transition Through These Objects
+--
+Bob Mintzer Big Band 0.0207620382552
+The George Gruntz Concert Jazz Band 0.0135038237287
+Toshiko Akiyoshi Jazz Orchestra 0.0108030927421
+The Vanguard Jazz Orchestra 0.0106342970554
+Bill Warfield Big Band 0.0101279099954
+Buddy Rich Big Band 0.00995911430878
+Mingus Big Band 0.00928393156213
+Maria Schneider Orchestra 0.00877754450214
+The Mel Lewis Jazz Orchestra 0.00843995312882
+Michael Davis 0.00827115744215
+
+
+## !! FREE JAZZ
+28
+These Users
+--
+Steve Lacy 0.675925925926
+Don Cherry 0.654761904762
+Archie Shepp 0.597222222222
+Roswell Rudd 0.545722713864
+Lester Bowie 0.539682539683
+George Lewis 0.533816425121
+David Murray 0.525157232704
+Arthur Blythe 0.521035598706
+Hamiet Bluiett 0.475177304965
+Oliver Lake 0.444444444444
+
+Transition Through These Objects
+--
+Archie Shepp 0.0204668747276
+The Sun Ra Arkestra 0.020294885629
+Cecil Taylor 0.0151352126697
+Steve Lacy 0.0134153216833
+Anthony Braxton 0.0118674197955
+Ornette Coleman 0.0118674197955
+World Saxophone Quartet 0.0118674197955
+David Murray Octet 0.0118674197955
+The Art Ensemble Of Chicago 0.00945957241446
+Sunny Murray 0.00894360511853
+
+
+7
+These Users
+--
+J.C. Higginbotham 0.561827956989
+Henry Red Allen 0.558479532164
+Kid Ory 0.544025157233
+Louis Armstrong 0.538226299694
+Trummy Young 0.486419753086
+Jimmy Archey 0.480286738351
+Sidney De Paris 0.445692883895
+Claude Jones 0.425396825397
+Jonah Jones 0.388185654008
+Sandy Williams 0.380341880342
+
+Transition Through These Objects
+--
+Louis Armstrong 0.109822601805
+Billie Holiday 0.0339262112207
+Sidney Bechet 0.0325271994127
+Louis Armstrong And His Orchestra 0.0320025699847
+Coleman Hawkins 0.0314779405567
+Ella Fitzgerald 0.0237833756126
+Benny Carter 0.0211602284726
+Duke Ellington And His Orchestra 0.0194114637126
+Cab Calloway 0.0174878224766
+Louis Armstrong And His All-Stars 0.0167883165726
+
+
+9
+These Users
+--
+Natsuki Tamura 0.477987421384
+Magnus Broo 0.445578231293
+Pat Halcox 0.395833333333
+Ack Van Rooyen 0.38431372549
+Ludwig Nuß 0.355555555556
+Bart Van Lier 0.350877192982
+Jiggs Whigham 0.336879432624
+Chris Barber 0.328703703704
+Christof Lauer 0.328703703704
+Joe Gallardo 0.319248826291
+
+Transition Through These Objects
+--
+Peter Herbolzheimer Rhythm Combination & Brass 0.0255344246277
+George Gruntz 0.0235702518534
+Bob Brookmeyer 0.0207132732725
+SWR Big Band 0.0153564384334
+Michael Gibbs 0.013392265659
+Jiggs Whigham 0.0130351433364
+The NDR Big Band 0.0121423375299
+The Peter Herbolzheimer Orchestra 0.0110709705621
+Peter Herbolzheimer 0.00982104243292
+Phil Wilson 0.00946392011031
+
+
+17
+These Users
+--
+Roger Guérin 0.516025641026
+Jean-Louis Chautemps 0.437984496124
+Benny Vasseur 0.414728682171
+Pierre Michelot 0.39846743295
+Denis Leloup 0.372294372294
+Claude Tchamitchian 0.337552742616
+Pierre Gossez 0.324200913242
+Henri Texier 0.31981981982
+Sébastien Boisseau 0.289215686275
+Bent Jædig 0.287037037037
+
+Transition Through These Objects
+--
+The Airmen Of Note 0.0200793235593
+Eddy Louiss 0.0200793235593
+Martial Solal 0.0189840976854
+Danish Radio Big Band 0.0131428930245
+André Hodeir 0.0116825918593
+Jef Gilson 0.0115000542137
+Orchestre National De Jazz 0.0104048283398
+Gérard Badini Super Swing Machine 0.0100397530485
+Claude Bolling Big Band 0.00894452717456
+Stéphane Grappelli 0.00821437659196
+
+
+13
+These Users
+--
+Tony Malaby 0.556497175141
+Rudi Mahall 0.52614379085
+Ray Anderson 0.497126436782
+Tim Berne 0.486928104575
+Ralph Alessi 0.462962962963
+Ellery Eskelin 0.457875457875
+Jeb Bishop 0.415873015873
+Drew Gress 0.410569105691
+Steven Bernstein 0.388888888889
+Mark Helias 0.370833333333
+
+Transition Through These Objects
+--
+Satoko Fujii Orchestra New York 0.0183392172605
+Steve Coleman And Five Elements 0.0124114493356
+John Zorn 0.00944756537309
+Anthony Braxton 0.00926232262544
+Marty Ehrlich 0.00574271042001
+Cassandra Wilson 0.00537222492471
+Paul Motian 0.00481649668175
+Erik Friedlander 0.00481649668175
+Bill Frisell 0.00444601118644
+Dave Douglas 0.00444601118644
+
+
+## Experimental, high entropy
+5
+These Users
+--
+Steve Swell 0.624378109453
+William Parker 0.592286501377
+Nate Wooley 0.501557632399
+Dominic Duval 0.450757575758
+Ken Filiano 0.443262411348
+Herb Robertson 0.441077441077
+Dave Douglas 0.432343234323
+Rob Brown (4) 0.43137254902
+John Zorn 0.416666666667
+Roy Campbell 0.410569105691
+
+Transition Through These Objects
+--
+William Parker 0.0221367913748
+Anthony Braxton 0.0191453600307
+Rova Saxophone Quartet 0.00897449346093
+Masada (3) 0.00837620719212
+The Vinny Golia Large Ensemble 0.00757849216704
+Aardvark Jazz Orchestra 0.00678077714195
+Vinny Golia 0.00638191962941
+The Fonda/Stevens Group 0.00618249087314
+Butch Morris 0.00598306211687
+John Zorn 0.0057836333606
+
+
+19
+These Users
+--
+Jimmy Knepper 0.583333333333
+Richard Williams 0.539784946237
+Booker Ervin 0.530158730159
+Charles McPherson 0.485815602837
+Ted Curson 0.43115942029
+Johnny Coles 0.427083333333
+Scott Hamilton 0.426666666667
+Billy Harper 0.369281045752
+Slide Hampton 0.351032448378
+Jack Walrath 0.349019607843
+
+Transition Through These Objects
+--
+Charles Mingus 0.0885818987687
+Lionel Hampton And His Orchestra 0.0293279242635
+Thad Jones / Mel Lewis Orchestra 0.0251382492984
+Lionel Hampton 0.0241407076401
+Thad Jones & Mel Lewis 0.0193525076801
+Duke Ellington 0.0159608660417
+Lionel Hampton & His Big Band 0.0141652910567
+Frank Foster 0.00917758276504
+Max Roach 0.00897807443337
+Miles Davis 0.00897807443337
+
+
+12
+These Users
+--
+Tom Garling 0.278606965174
+Sal Nistico 0.271241830065
+Petras Vyšniauskas 0.267676767677
+Mike Murley 0.244791666667
+Paul McKee 0.244791666667
+Dale Kirkland 0.241025641026
+Mark Colby 0.207650273224
+Nat Pavone 0.207070707071
+Willie Thomas 0.204301075269
+Alejo Poveda 0.194444444444
+
+Transition Through These Objects
+--
+The North Texas State University Lab Band 0.0585241663754
+Maynard Ferguson 0.0366028185624
+University Of North Texas Two O'Clock Lab Band 0.0281560606896
+Woody Herman 0.0271504942761
+Buddy Rich 0.0225248887743
+Maynard Ferguson & His Orchestra 0.0189048496859
+Buddy Rich Big Band 0.0185026231205
+Stan Kenton And His Orchestra 0.016893716859
+Frank Mantooth 0.0140781309014
+Rob Parton's Jazztech Big Band 0.0108603183784
+
+
+20 ## UNOBVIOUS : Chet in Italy
+These Users
+--
+Giovanni Maier 0.603825136612
+Gianni Basso 0.486394557823
+Lauro Rossi 0.450757575758
+Dino Piana 0.444444444444
+Giancarlo Schiaffini 0.440740740741
+Enrico Rava 0.439528023599
+Enzo Pietropaoli 0.410569105691
+Roberto Ottaviano 0.388185654008
+Bruno Tommaso 0.380341880342
+Paolino Dalla Porta 0.355555555556
+
+Transition Through These Objects
+--
+Giorgio Gaslini 0.0204112221828
+Italian Instabile Orchestra 0.0195865346672
+Enrico Rava 0.0140198939369
+Nexus (46) 0.0113396595113
+Chet Baker 0.0107211438746
+Nicola Conte 0.0101026282379
+Piero Umiliani 0.00927794072229
+Franco D'Andrea 0.0080409094489
+Mina (3) 0.0076285656911
+Roberto Gatto 0.0074223938122
+
+
+26 ## SWEDISH
+These Users
+--
+Arne Domnérus 0.529595015576
+Jan Allan 0.511784511785
+Bernt Rosengren 0.511111111111
+Jim Robinson (2) 0.474637681159
+Bertil Lövgren 0.424603174603
+Bjarne Nerem 0.40562248996
+Lars Gullin 0.396296296296
+Bengt-Arne Wallin 0.372294372294
+Juhani Aaltonen 0.355555555556
+Nisse Sandström 0.319248826291
+
+Transition Through These Objects
+--
+Lars Gullin 0.0280833951376
+Umo Jazz Orchestra 0.0197860912508
+Jan Johansson 0.0187223343422
+Monica Zetterlund 0.0178713288153
+Bengt-Arne Wallin 0.0151055608531
+Harry Arnold & His Swedish Radio Studio Orchestra 0.0138290525628
+Nils Lindberg 0.0134035497994
+Radiojazzgruppen 0.0129780470359
+UMO Jazz Orchestra 0.0125525442725
+George Russell 0.00999952769193
+
+
+25
+These Users
+--
+Tomasz Stańko 0.47619047619
+Tomasz Szukalski 0.437984496124
+Anders Jormin 0.410569105691
+Palle Danielsson 0.40701754386
+Zbigniew Namysłowski 0.40329218107
+Nils Petter Molvær 0.388185654008
+Marilyn Mazur 0.364035087719
+Michał Barański 0.299516908213
+Jacek Niedziela 0.299516908213
+Lars Danielsson (3) 0.299516908213
+
+Transition Through These Objects
+--
+Jarosław Śmietana 0.0105499089287
+Kaspar Ewalds Exorbitantes Kabinett 0.00825650032268
+Tomasz Stańko 0.00802715946208
+Novi Singers 0.00756847774086
+Walk Away 0.00756847774086
+Jon Balke 0.00688045515904
+Vienna Art Orchestra 0.00642177343783
+Zbigniew Namysłowski 0.00596309171662
+Krzysztof Komeda 0.00550440999541
+Zbigniew Lewandowski 0.0052750691348
+
+
+22
+These Users
+--
+Albert Mangelsdorff 0.556277056277
+Heinz Sauer 0.346846846847
+Matthias Schubert 0.324894514768
+Masahiko Togashi 0.310502283105
+Kohsuke Mine 0.309523809524
+Shigeharu Mukai 0.309523809524
+Konosuke Saijo 0.289215686275
+Joki Freund 0.289215686275
+Herman Schoonderwalt 0.289215686275
+Emil Mangelsdorff 0.289215686275
+
+Transition Through These Objects
+--
+Toshiyuki Miyama & The New Herd 0.0158943155751
+Boy's Big Band 0.0156605790775
+Terumasa Hino 0.0135569505989
+Takeshi Inomata & The Third 0.0130894776036
+Rita Reys 0.010985849125
+Hans Koller 0.010985849125
+ORF Big Band 0.00981716663683
+The Dutch Swing College Band 0.00934969364158
+Sadao Watanabe 0.00724606516293
+Mari Nakamoto 0.00701232866531
+
+
+2
+These Users
+--
+Ronnie Scott 0.535256410256
+Jimmy Deuchar 0.462962962963
+Ronnie Ross 0.435897435897
+Derek Watkins 0.42962962963
+Tony Coe 0.424908424908
+Don Lusher 0.424603174603
+Eddie Blair 0.417670682731
+Danny Moss 0.39837398374
+Keith Christie 0.380341880342
+George Chisholm 0.367521367521
+
+Transition Through These Objects
+--
+Ted Heath And His Music 0.0410962346201
+Clarke-Boland Big Band 0.0366343832148
+Johnny Keating And All Stars 0.0176128061711
+The John Dankworth Orchestra 0.0169083033176
+Clark Terry 0.0150296290417
+Kenny Wheeler 0.0136206233347
+Cleo Laine 0.0136206233347
+Michael Gibbs 0.0112722804898
+Tubby Hayes 0.0112722804898
+Maynard Ferguson 0.0108026119208
+
+
+## CHET AGAIN. DAVE BRUBECK, MILES. GERRY MULLIGAN.
+8
+These Users
+--
+Lee Konitz 0.7071197411
+Paul Desmond 0.689727463312
+Chet Baker 0.668817204301
+Warne Marsh 0.537537537538
+Gerry Mulligan 0.521815008726
+Alix Combelle 0.348484848485
+Red Mitchell 0.313008130081
+Bob Brookmeyer 0.290277777778
+Jon Eardley 0.283333333333
+Eugene Wright 0.278606965174
+
+Transition Through These Objects
+--
+Gerry Mulligan 0.0293027916237
+Chet Baker 0.0287841627333
+The Dave Brubeck Quartet 0.0280062193976
+Dave Brubeck 0.0267096471716
+Gerry Mulligan Quartet 0.0259317038359
+Miles Davis 0.0241165027194
+Django Reinhardt 0.0228199304933
+Stan Getz 0.0197081571508
+Lee Konitz 0.0155591260273
+Lennie Tristano 0.0106321515683
+
+
+1
+These Users
+--
+Wolter Wierbos 0.607046070461
+Ernst Glerum 0.424603174603
+Wilbert De Joode 0.309523809524
+Eric Vloeimans 0.309523809524
+Michael Vatcher 0.309523809524
+Øyvind Brække 0.295238095238
+Wilbert de Joode 0.285024154589
+Tobias Delius 0.283105022831
+Ole Morten Vågan 0.278606965174
+Eivind Lønning 0.267676767677
+
+Transition Through These Objects
+--
+Willem Breuker Kollektief 0.0156070975551
+Trondheim Jazz Orchestra 0.0142616813075
+ICP Orchestra 0.00995634931527
+Contraband (13) 0.00968726606575
+J.C. Tans + Rockets 0.00968726606575
+Bik Bent Braam 0.0086109330677
+Terje Rypdal 0.00807276656867
+Willem Breuker 0.00753460006964
+De Zes Winden 0.0067273503211
+Fud Candrix Et Son Orchestre 0.00645826707159

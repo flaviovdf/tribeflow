@@ -90,21 +90,27 @@ cdef inline int sample(int idx, double[:,::1] Dts, int[:,::1] Trace, \
     cdef int z, j
     cdef int hyper = Trace[idx, 0]
     cdef double dt = Dts[idx, Dts.shape[1] - 1]
-    cdef int last_obj = Trace[idx, Trace.shape[1] - 2]
+    #cdef int last_obj = Trace[idx, Trace.shape[1] - 2]
+    cdef int prev
+    cdef double prev_prob
     cdef int obj
 
     for z in xrange(nz):
+        obj = Trace[idx, 1]
         prob_topics_aux[z] = kernel.pdf(dt, z, previous_stamps) * \
-            dir_posterior(Count_zh[z, hyper], count_h[hyper], nz, alpha_zh)
+            dir_posterior(Count_zh[z, hyper], count_h[hyper], nz, alpha_zh) * \
+            dir_posterior(Count_sz[obj, z], count_z[z], ns, beta_zs)
 
-        for j in xrange(1, Trace.shape[1] - 1):
+        for j in xrange(2, Trace.shape[1] - 1):
             obj = Trace[idx, j]
-            prob_topics_aux[z] = prob_topics_aux[z] * \
-                    dir_posterior(Count_sz[obj, z], count_z[z], ns, beta_zs)
+            prev = Trace[idx, j - 1]
+            prev_prob = dir_posterior(
+                    Count_sz[prev, z], count_z[z], ns, beta_zs)
 
-        prob_topics_aux[z] = prob_topics_aux[z] / \
-            (1 - dir_posterior(Count_sz[last_obj, z], count_z[z], ns, beta_zs))
-        
+            prob_topics_aux[z] = prob_topics_aux[z] * \
+                dir_posterior(Count_sz[obj, z], count_z[z], ns, beta_zs) / \
+                (1 - prev_prob)
+
         #accumulate multinomial parameters
         if z >= 1:
             prob_topics_aux[z] += prob_topics_aux[z - 1]
@@ -246,17 +252,26 @@ def quality_estimate(double[:,::1] Dts, int[:,::1] Trace, \
     cdef int ns = Count_sz.shape[0]
     
     cdef int i = 0
-    cdef int h, z, o = 0
+    cdef int j = 0
+    cdef int h = 0
+    cdef int z = 0
+    cdef int o = 0
+    cdef int p = 0
     cdef double dt = 0
 
     for i in xrange(idx.shape[0]):
         dt = Dts[idx[i], Dts.shape[1] - 1] 
         h = Trace[idx[i], 0]
         z = Trace[idx[i], Trace.shape[1] - 1]
-        for j in xrange(1, Trace.shape[1] - 1):
+        ll_per_z[z] += \
+            log(dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs))
+
+        for j in xrange(2, Trace.shape[1] - 1):
             o = Trace[i, j]
+            p = Trace[i, j - 1]
             ll_per_z[z] += \
-                log(dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs))
+                log(dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs) / \
+                (1 - dir_posterior(Count_sz[p, z], count_z[z], ns, beta_zs)))
 
         ll_per_z[z] += \
                 log(dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
