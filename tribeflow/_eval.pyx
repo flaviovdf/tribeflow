@@ -9,7 +9,7 @@ from __future__ import division, print_function
 from cpython cimport bool
 from cython.parallel cimport prange
 
-from tribeflow._learn import dir_posterior
+from tribeflow cimport _learn
 from tribeflow.kernels.base cimport Kernel
 from tribeflow.mycollections.stamp_lists cimport StampLists
 
@@ -37,10 +37,12 @@ def quality_estimate(double[:,::1] Dts, int[:,::1] Trace, \
         for j in xrange(1, Trace.shape[1] - 1):
             o = Trace[i, j]
             ll_per_z[z] += \
-                log(dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs))
+                log(_learn.dir_posterior(Count_sz[o, z], count_z[z], ns, \
+                beta_zs))
 
         ll_per_z[z] += \
-                log(dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
+                log(_learn.dir_posterior(Count_zh[z, h], count_h[h], nz, \
+                alpha_zh)) + \
                 log(kernel.pdf(dt, z, previous_stamps))
 
 def reciprocal_rank(double[:, ::1] Dts, int[:, ::1] HOs, \

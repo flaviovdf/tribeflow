@@ -1,7 +1,7 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from tribeflow import _learn
+from tribeflow import _eval
 from tribeflow.mycollections.stamp_lists import StampLists
 
 import tribeflow
