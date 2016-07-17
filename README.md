@@ -4,7 +4,8 @@ TribeFlow
 
 1. [Home](#top)
 2. [Datasets](#data)
-3. [Competing Methods](#competition)
+3. [Reproducibility](#reproducibility)
+4. [Competing Methods](#competition)
 
 Contains the TribeFlow (previously node-sherlock) source code.
 
@@ -187,6 +188,17 @@ $ mpiexec -np 20 python main.py trace.dat 100 output.h5 \
     --leaveout 0.3 --num_iter 2000 --num_batches 20
 ```
 
+**Predictions**
+
+The mean reciprocal rank script will generate predictions and save them to the given files.
+Just run:
+
+```bash
+$ PYTHONPATH=. python scripts/mrr.py output.h5 rss.dat predictions.dat
+```
+
+`output.h5` is the model trained.
+
 <a name="data"></a>
 Datasets
 ========
@@ -220,6 +232,15 @@ timestamps.
 
 On the `example` folder we have some sub-sampled datasets that can be used to
 better understand the method.
+
+<a name="reproductibility"></a>
+Reproducibility
+===============
+
+The current version of the code may not be the exact version used in any of the
+papers that employ Tribeflow. However, and most importantly, I am tagging the
+commits closest to each paper. Please check the tags if you want to run an exact
+version of tribeflow used in a given paper.
 
 <a name="competition"></a>
 Competing Methods
