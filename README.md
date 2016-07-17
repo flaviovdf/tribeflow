@@ -204,7 +204,9 @@ $ PYTHONPATH=. python scripts/mrr.py output.h5 rss.dat predictions.dat
 Similar to the script above, you can use the scripts:
 
 1. `view_topics.py` to print a summary of the topics with most likely objects
-2. `plotmat.py` to plot either an O by O matrix or a Z by Z matrix 
+2. `printmat.py` to print either an O by O matrix or a Z by Z matrix 
+3. `plotmat-toyplot.py` to generate the Z by Z matrix in the ISMIR jazz paper
+4. `fancyplot.py` to generate the Miles Davis plot in the ISMIR jazz paper
 
 <a name="data"></a>
 Datasets
