@@ -190,14 +190,21 @@ $ mpiexec -np 20 python main.py trace.dat 100 output.h5 \
 
 **Predictions**
 
-The mean reciprocal rank script will generate predictions and save them to the given files.
-Just run:
+The mean reciprocal rank script will generate predictions and save them to the 
+given files. Just run:
 
 ```bash
 $ PYTHONPATH=. python scripts/mrr.py output.h5 rss.dat predictions.dat
 ```
 
 `output.h5` is the model trained.
+
+**Other useful scripts**
+
+Similar to the script above, you can use the scripts:
+
+1. `view_topics.py` to print a summary of the topics with most likely objects
+2. `plotmat.py` to plot either an O by O matrix or a Z by Z matrix 
 
 <a name="data"></a>
 Datasets
