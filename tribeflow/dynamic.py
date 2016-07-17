@@ -14,6 +14,7 @@ from tribeflow.plearn import manage
 from tribeflow.plearn import Msg
 
 import _learn
+import _eval
 import numpy as np
 
 def finalize_splits(nz, n_splits, splitted, Dts, Trace, nh, ns, kernel):
@@ -121,7 +122,7 @@ def split(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
         ll_per_z_new[-1] = 0
         
         idx_int = idx_int_all[idx]
-        _learn.quality_estimate(Dts, Trace, \
+        _eval.quality_estimate(Dts, Trace, \
                 new_stamps, Count_zh_spl, Count_sz_spl, count_h, \
                 count_z_spl, alpha_zh, beta_zs, \
                 ll_per_z_new, idx_int, kernel)
@@ -277,7 +278,7 @@ def merge(Dts, Trace, previous_stamps, Count_zh, Count_sz, \
         ll_per_z_new = ll_per_z.copy()
         ll_per_z_new[z2] = 0
 
-        _learn.quality_estimate(Dts, Trace, \
+        _eval.quality_estimate(Dts, Trace, \
                 new_stamps, Count_zh_mrg, Count_sz_mrg, count_h, \
                 count_z_mrg, alpha_zh, beta_zs, \
                 ll_per_z_new, idx_int, kernel)
@@ -373,7 +374,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
         
         print('Split')
         ll_per_z = np.zeros(count_z.shape[0], dtype='f8')
-        _learn.quality_estimate(Dts, Trace, previous_stamps, \
+        _eval.quality_estimate(Dts, Trace, previous_stamps, \
                 Count_zh, Count_sz, count_h, count_z, alpha_zh, \
                 beta_zs, ll_per_z, all_idx, kernel)
         Trace, Count_zh, Count_sz, count_z, previous_stamps, \
@@ -387,7 +388,7 @@ def fit(trace_fpath, num_topics, alpha_zh, beta_zs, kernel, \
 
         print('Merge')
         ll_per_z = np.zeros(count_z.shape[0], dtype='f8')
-        _learn.quality_estimate(Dts, Trace, previous_stamps, \
+        _eval.quality_estimate(Dts, Trace, previous_stamps, \
                 Count_zh, Count_sz, count_h, count_z, alpha_zh, \
                 beta_zs, ll_per_z, all_idx, kernel)
         Trace, Count_zh, Count_sz, count_z, previous_stamps, \

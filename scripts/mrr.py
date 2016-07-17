@@ -9,7 +9,7 @@ import pandas as pd
 import plac
 import numpy as np
 
-def main(model, out_fpath):
+def main(model, out_fpath_rrs, out_fpath_pred):
     store = pd.HDFStore(model)
     
     from_ = store['from_'][0][0]
@@ -72,10 +72,11 @@ def main(model, out_fpath):
 
     HSDs = np.array(HSDs, dtype='i4')[queries].copy()
     Dts = np.array(Dts, dtype='d')[queries].copy()
-    rrs = _learn.reciprocal_rank(Dts, \
-            HSDs, previous_stamps, Theta_zh, Psi_sz, count_z, kernel)
+    rrs, preds = _eval.reciprocal_rank(Dts, \
+            HSDs, previous_stamps, Theta_zh, Psi_sz, count_z, kernel, True)
     
-    np.savetxt(out_fpath, rrs)
+    np.savetxt(out_fpath_rrs, rrs)
+    np.savetxt(out_fpath_pred, preds)
     print(rrs.mean(axis=0))
     store.close()
     
