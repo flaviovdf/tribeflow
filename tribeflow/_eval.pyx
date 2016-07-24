@@ -104,7 +104,7 @@ def reciprocal_rank(double[:, ::1] Dts, int[:, ::1] HOs, \
             mem_factor[z] = 1.0
             for j in xrange(mem.shape[0]):
                 mem_factor[z] *= Psi_sz[mem[j], z]
-        mem_factor[z] *= 1.0 / (1 - Psi_sz[mem[mem.shape[0] - 1], z])
+            mem_factor[z] *= 1.0 / (1 - Psi_sz[mem[mem.shape[0] - 1], z])
 
         for z in xrange(Psi_sz.shape[1]):
             for candidate_o in prange(ns, schedule='static', nogil=True):
