@@ -188,7 +188,7 @@ $ mpiexec -np 20 python main.py trace.dat 100 output.h5 \
     --leaveout 0.3 --num_iter 2000 --num_batches 20
 ```
 
-**What if I don't want to explore inter-event times? Like Tribeflow-nt in the paper?
+**What if I don't want to explore inter-event times? Like Tribeflow-nt in the paper?**
 
 Use the noop kernel
 
