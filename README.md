@@ -199,6 +199,9 @@ mpiexec -np 20 python main.py trace.dat 100 output.h5 \
     --leaveout 0.3 --num_iter 2000
 ```
 
+Notice that this line does not use *--dynamic* nor *--num_batches*. They are useless
+and may lead to strange results in this case.
+
 **Predictions**
 
 The mean reciprocal rank script will generate predictions and save them to the 
