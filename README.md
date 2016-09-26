@@ -179,12 +179,13 @@ parameters:
    * *--residency_priors 1 99* The priors for the inter-event time estimation.
    * *--leaveout 0.3* Number of transitions to leaveout.
    * *--num_iter 2000* Number of iterations.
+   * *--dynamic* Try and find the number of latent spaces from the data
    * *--num_batches 20* Number of split/merge moves.
 
 *The example below uses 20 cores*
 ```bash
 $ mpiexec -np 20 python main.py trace.dat 100 output.h5 \
-    --kernel eccdf --residency_priors 1 99 \
+    --kernel eccdf --residency_priors 1 99 --dynamic \
     --leaveout 0.3 --num_iter 2000 --num_batches 20
 ```
 
@@ -195,7 +196,7 @@ Use the noop kernel
 ```bash
 mpiexec -np 20 python main.py trace.dat 100 output.h5 \
     --kernel noop
-    --leaveout 0.3 --num_iter 2000 --num_batches 20
+    --leaveout 0.3 --num_iter 2000
 ```
 
 **Predictions**
