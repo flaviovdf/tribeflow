@@ -195,7 +195,7 @@ Use the noop kernel
 
 ```bash
 mpiexec -np 20 python main.py trace.dat 100 output.h5 \
-    --kernel noop
+    --kernel noop \
     --leaveout 0.3 --num_iter 2000
 ```
 
