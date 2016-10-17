@@ -1,7 +1,7 @@
 #-*- coding: utf8
 from __future__ import division, print_function
 
-from tribeflow._learn import em
+from _learn import em
 
 from tribeflow import dataio
 

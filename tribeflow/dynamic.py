@@ -19,7 +19,7 @@ import numpy as np
 
 def finalize_splits(nz, n_splits, splitted, Dts, Trace, nh, ns, kernel):
     
-    new_nz = nz + n_splits 
+    new_nz = nz + n_splits
     if kernel.get_priors().shape[0] > 0:
         new_P = [row for row in kernel.get_state()]
         for _ in xrange(n_splits):
@@ -179,7 +179,7 @@ def finalize_merge(nz, to_merge, Dts, Trace, nh, ns, kernel):
         idx = Trace[:, -1] == z2
         Trace[:, -1][idx] = z1
     
-    if kernel.get_priors().shape[0] > 0:
+    if to_merge and kernel.get_priors().shape[0] > 0:
         new_P_dict = dict((i, row) for i, row in enumerate(kernel.get_state()))
         for z1, z2 in to_merge:
             del new_P_dict[z2]
@@ -193,10 +193,13 @@ def finalize_merge(nz, to_merge, Dts, Trace, nh, ns, kernel):
     #Make sure new trace has contiguous ids
     new_assign = Trace[:, -1].copy()
     old_assign = Trace[:, -1].copy()
-    new_nz = len(set(new_assign))
-    for i, z in enumerate(set(new_assign)):
-        idx = old_assign == z
-        new_assign[idx] = i
+    if to_merge:
+        new_nz = len(set(new_assign))
+        for i, z in enumerate(set(new_assign)):
+            idx = old_assign == z
+            new_assign[idx] = i
+    else:
+        new_nz = nz
     Trace[:, -1] = new_assign
 
     #Populate new counts
