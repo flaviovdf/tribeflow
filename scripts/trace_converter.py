@@ -20,7 +20,7 @@ def main():
             type=bool, default=False)
     parser.add_argument('-r', '--sort', help='Sort the trace', \
             type=bool, default=True)
-    parser.add_argument('-f', '--fmt', \
+    parser.add_argument('-f', '--fmt', nargs='+', \
             help='The format of the date in the trace', type=str, default=None)
     parser.add_argument('-s', '--scale', \
             help='Scale the time by this value', type=float, default=1.0)
@@ -35,6 +35,9 @@ def main():
     ocol = args.obj_node_column
     tcol = args.tstamp_column
     fmt = args.fmt
+    if type(fmt) == list:
+        fmt = ' '.join(fmt)
+
     consider_loops = args.loops
     skip = args.skip_header
     mem_size = args.mem_size
@@ -52,9 +55,9 @@ def main():
 
             for line in trace_file:
                 spl = line.split(delim)
-                h = spl[hcol]
-                o = spl[ocol]
-                t = spl[tcol]
+                h = spl[hcol].strip()
+                o = spl[ocol].strip()
+                t = spl[tcol].strip()
                 
                 if t.strip() and h.strip() and o.strip():
                     t = parser(t.strip())
@@ -76,8 +79,8 @@ def main():
             for i in xrange(1, mem_size):
                 print(mem[i][0] - mem[i - 1][0], end='\t')
             
-            #print(t_now - t_prev, end='\t')
-            print(t_now, end='\t')
+            print(t_now - t_prev, end='\t')
+            #print(t_now, end='\t')
             print(h_now.strip(), end='\t')
             for i in xrange(mem_size):
                 print(mem[i][1].strip(), end='\t')
