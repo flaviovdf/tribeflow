@@ -27,22 +27,30 @@ def quality_estimate(double[:,::1] Dts, int[:,::1] Trace, \
     cdef int ns = Count_sz.shape[0]
     
     cdef int i = 0
-    cdef int h, z, o = 0
+    cdef int j = 0
+    cdef int h = 0
+    cdef int z = 0
+    cdef int o = 0
+    cdef int p = 0
     cdef double dt = 0
 
     for i in xrange(idx.shape[0]):
         dt = Dts[idx[i], Dts.shape[1] - 1] 
-        h = Trace[idx[i], 0]
         z = Trace[idx[i], Trace.shape[1] - 1]
-        for j in xrange(1, Trace.shape[1] - 1):
+        h = Trace[idx[i], 0]
+        o = Trace[idx[i], 1]
+        ll_per_z[z] += \
+            log(_learn.dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs))
+
+        for j in xrange(2, Trace.shape[1] - 1):
             o = Trace[i, j]
+            p = Trace[i, j - 1]
             ll_per_z[z] += \
-                log(_learn.dir_posterior(Count_sz[o, z], count_z[z], ns, \
-                beta_zs))
+                log(_learn.dir_posterior(Count_sz[o, z], count_z[z], ns, beta_zs) / \
+                (1 - _learn.dir_posterior(Count_sz[p, z], count_z[z], ns, beta_zs)))
 
         ll_per_z[z] += \
-                log(_learn.dir_posterior(Count_zh[z, h], count_h[h], nz, \
-                alpha_zh)) + \
+                log(_learn.dir_posterior(Count_zh[z, h], count_h[h], nz, alpha_zh)) + \
                 log(kernel.pdf(dt, z, previous_stamps))
 
 def reciprocal_rank(double[:, ::1] Dts, int[:, ::1] HOs, \
@@ -103,7 +111,11 @@ def reciprocal_rank(double[:, ::1] Dts, int[:, ::1] HOs, \
         for z in xrange(Psi_sz.shape[1]):
             mem_factor[z] = 1.0
             for j in xrange(mem.shape[0]):
-                mem_factor[z] *= Psi_sz[mem[j], z]
+                if j == 0:
+                    mem_factor[z] *= Psi_sz[mem[j], z]
+                else:
+                    mem_factor[z] *= \
+                            Psi_sz[mem[j], z] / (1.0 - Psi_sz[mem[j-1], z])
             mem_factor[z] *= 1.0 / (1 - Psi_sz[mem[mem.shape[0] - 1], z])
 
         for z in xrange(Psi_sz.shape[1]):

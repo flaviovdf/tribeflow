@@ -77,7 +77,7 @@ def main(model, out_fpath_rrs, out_fpath_pred):
     
     np.savetxt(out_fpath_rrs, rrs)
     np.savetxt(out_fpath_pred, preds)
-    print(rrs.mean(axis=0))
+    print((1.0 / rrs).mean(axis=0))
     store.close()
     
 plac.call(main)

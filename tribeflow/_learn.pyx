@@ -90,21 +90,27 @@ cdef inline int sample(int idx, double[:,::1] Dts, int[:,::1] Trace, \
     cdef int z, j
     cdef int hyper = Trace[idx, 0]
     cdef double dt = Dts[idx, Dts.shape[1] - 1]
-    cdef int last_obj = Trace[idx, Trace.shape[1] - 2]
+    #cdef int last_obj = Trace[idx, Trace.shape[1] - 2]
+    cdef int prev
+    cdef double prev_prob
     cdef int obj
 
     for z in xrange(nz):
+        obj = Trace[idx, 1]
         prob_topics_aux[z] = kernel.pdf(dt, z, previous_stamps) * \
-            dir_posterior(Count_zh[z, hyper], count_h[hyper], nz, alpha_zh)
+            dir_posterior(Count_zh[z, hyper], count_h[hyper], nz, alpha_zh) * \
+            dir_posterior(Count_sz[obj, z], count_z[z], ns, beta_zs)
 
-        for j in xrange(1, Trace.shape[1] - 1):
+        for j in xrange(2, Trace.shape[1] - 1):
             obj = Trace[idx, j]
-            prob_topics_aux[z] = prob_topics_aux[z] * \
-                    dir_posterior(Count_sz[obj, z], count_z[z], ns, beta_zs)
+            prev = Trace[idx, j - 1]
+            prev_prob = dir_posterior(
+                    Count_sz[prev, z], count_z[z], ns, beta_zs)
 
-        prob_topics_aux[z] = prob_topics_aux[z] / \
-            (1 - dir_posterior(Count_sz[last_obj, z], count_z[z], ns, beta_zs))
-        
+            prob_topics_aux[z] = prob_topics_aux[z] * \
+                dir_posterior(Count_sz[obj, z], count_z[z], ns, beta_zs) / \
+                (1 - prev_prob)
+
         #accumulate multinomial parameters
         if z >= 1:
             prob_topics_aux[z] += prob_topics_aux[z - 1]
