@@ -10,7 +10,7 @@ from tribeflow.tests import files
 
 from tribeflow.kernels import ECCDFKernel
 
-from tribeflow._learn import quality_estimate
+from tribeflow._eval import quality_estimate
 from tribeflow._learn import fast_populate
 
 from numpy.testing import assert_equal

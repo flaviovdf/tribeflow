@@ -35,18 +35,30 @@ def main():
     
     nz = Psi_oz.shape[1]
     k = 10
-    for z, pz in counter.most_common()[-nz:]:
-        print(z)
-        print('These Users\n--')
-        for i in Theta_hz[:, z].argsort()[::-1][:k]:
-            print(id2hyper[i], Theta_hz[i, z])
-        print()
+    print('topic', end='\t')
+    for i in xrange(k):
+        print('TopUser_%d' %i, 'Pzu_%d' %i, end='\t', sep='\t')
+    for i in xrange(k):
+        if i != k - 1: 
+            print('TopObj_%d' %i, 'Poz_%d' %i, end='\t', sep='\t')
+        else:
+            print('TopObj_%d' %i, 'Poz_%d' %i, sep='\t')
 
-        print('Transition Through These Objects\n--')
+    for z, pz in counter.most_common()[-nz:]:
+        print(z, end='\t')
+        #print('These Users\n--')
+        for i in Theta_hz[:, z].argsort()[::-1][:k]:
+            print(id2hyper[i], Theta_hz[i, z], sep='\t', end='\t')
+        #print()
+
+        #print('Transition Through These Objects\n--')
         for i in Psi_oz[:, z].argsort()[::-1][:k]:
-            print(id2source[i], Psi_oz[i, z])
-        print()
-        print()
+            if i != Psi_oz[:, z].argsort()[::-1][k-1]: 
+                print(id2source[i], Psi_oz[i, z], sep='\t', end='\t')
+            else:
+                print(id2source[i], Psi_oz[i, z], sep='\t')
+        #print()
+        #print()
 
     model.close()
 

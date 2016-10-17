@@ -7,10 +7,8 @@ import plac
 import numpy as np
 import sys
 
-def main(model_fpath, out_fpath, o_by_o=False):
-    o_by_o = bool(o_by_o)
+def main(model_fpath, out_fpath, which='z_by_z'):
     store = pd.HDFStore(model_fpath)
-    
     from_ = store['from_'][0][0]
     to = store['to'][0][0]
     assert from_ == 0
@@ -25,19 +23,30 @@ def main(model_fpath, out_fpath, o_by_o=False):
     obj2id = dict(store['source2id'].values)
     id2obj = dict((v, k) for k, v in obj2id.items())
     
-    if o_by_o:
+    if which == 'z_by_z':
         T = Psi_oz.dot(Psi_zo)
-    else:
+        np.fill_diagonal(T, 0)
+        T = T / T.sum(axis=0)
+    elif which == 'o_by_o':
         T = Psi_zo.dot(Psi_oz)
-    
-    np.fill_diagonal(T, 0)
-    T = T / T.sum(axis=0)
-    if o_by_o:
-        names = [id2obj[i] for i in xrange(T.shape[0])]
+        np.fill_diagonal(T, 0)
+        T = T / T.sum(axis=0)
+    elif which == 'o_by_z':
+        T = Psi_oz.T
     else:
-        names = xrange(T.shape[0])
-
-    df = pd.DataFrame(data=T, index=names, columns=names)
+        raise Exception('Unknown option, chosse from z_by_z, o_by_o, o_by_z')
+    
+    if which == 'z_by_z':
+        cols = ['Z_%d' % x for x in range(T.shape[1])]
+        idx = cols
+    elif which == 'o_by_o':
+        cols = [id2obj[i] for i in range(T.shape[0])]
+        idx = cols
+    else:
+        cols = [id2obj[i] for i in range(T.shape[0])]
+        idx = ['Z_%d' % x for x in range(T.shape[1])]
+    
+    df = pd.DataFrame(T, index=idx, columns=cols)
     df.to_csv(out_fpath, sep='\t')
     store.close()
     

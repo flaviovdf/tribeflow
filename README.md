@@ -47,6 +47,12 @@ Use or package manager (*apt* on Ubuntu, *HomeBrew* on a mac) to install
 OpenMP and MPI. These are the managers I tested with. Should work on any
 other environment.
 
+Also make sure you have enum34
+
+```bash
+pip install enum34
+```
+
 How to compile
 --------------
 
