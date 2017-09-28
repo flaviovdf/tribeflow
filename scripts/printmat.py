@@ -25,7 +25,6 @@ def main(model_fpath, out_fpath, which='z_by_z'):
     
     if which == 'z_by_z':
         T = Psi_oz.dot(Psi_zo)
-        np.fill_diagonal(T, 0)
         T = T / T.sum(axis=0)
     elif which == 'o_by_o':
         T = Psi_zo.dot(Psi_oz)
